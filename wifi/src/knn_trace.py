@@ -3,10 +3,10 @@ import numpy as np
 from sklearn import neighbors
 import matplotlib.pyplot as plt
 
-offline_rss = pd.read_excel("Data/offline_rss.xlsx", header=None).values
-offline_location = pd.read_excel("Data/offline_location.xlsx", header=None).values
-trace_rss = pd.read_excel("Data/trace_rss.xlsx", header=None).values
-trace_location = pd.read_excel("Data/trace_location.xlsx", header=None).values
+offline_rss = pd.read_excel("../data/offline_rss.xlsx", header=None).values
+offline_location = pd.read_excel("../data/offline_location.xlsx", header=None).values
+trace_rss = pd.read_excel("../data/trace_rss.xlsx", header=None).values
+trace_location = pd.read_excel("../data/trace_location.xlsx", header=None).values
 
 def accuracy(predictions, labels):
     return np.mean(np.sqrt(np.sum((predictions - labels)**2, 1)))
