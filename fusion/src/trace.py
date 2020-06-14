@@ -2,8 +2,12 @@ from FUSION import FUSION
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
-path = 'C:/Users/salmo/Desktop/location/fusion/experiment_data'
+if os.path.exists('C:/Users/salmos'):
+    path = 'C:/Users/salmos/Desktop/location/fusion/experiment_data'
+elif os.path.exists('C:/Users/salmo'):
+    path = 'C:/Users/salmo/Desktop/location/fusion/experiment_data'
 
 walking_data_file = path + '/S-Type/SType-08.csv'
 real_trace_file = path + '/S-Type/RealTrace.csv'
