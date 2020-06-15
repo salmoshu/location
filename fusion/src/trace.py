@@ -38,8 +38,24 @@ for k, v in enumerate(steps):
     result = np.concatenate((result,value),axis=0)
 
 # knn算法
-predict, accuracy = fusion.knn_reg(fingerprint_rssi, fingerprint_position, result, real_trace, k=3)
-print('knn accuracy:', accuracy)
+# predict, accuracy = fusion.knn_reg(fingerprint_rssi, fingerprint_position, result, real_trace, k=3)
+# print('knn accuracy:', accuracy, 'm')
+
+# svm算法
+# predict, accuracy = fusion.svm_reg(fingerprint_rssi, fingerprint_position, result, real_trace)
+# print('svm accuracy:', accuracy, 'm')
+
+# rf算法
+predict, accuracy = fusion.rf_reg(fingerprint_rssi, fingerprint_position, result, real_trace)
+print('rf accuracy:', accuracy, 'm')
+
+# gdbt算法
+# predict, accuracy = fusion.dbdt(fingerprint_rssi, fingerprint_position, result, real_trace)
+# print('gdbt accuracy:', accuracy, 'm')
+
+# 多层感知机
+# predict, accuracy = fusion.nn(fingerprint_rssi, fingerprint_position, result, real_trace)
+# print('nn accuracy:', accuracy, 'm')
 
 # fusion.show_trace('pdr', real_trace=real_trace, offset=np.pi/2)
 fusion.show_trace('wifi', real_trace=real_trace, predict_trace=predict)

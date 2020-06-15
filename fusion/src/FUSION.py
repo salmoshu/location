@@ -12,7 +12,11 @@ numpy.ndarray
 
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn import neighbors
+from sklearn import ensemble
+from sklearn import neighbors, svm
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.multioutput import MultiOutputRegressor
+from sklearn.neural_network import MLPRegressor
 
 class FUSION(object):
     def __init__(self, timestamp, rssi, linear, gravity, rotation):
@@ -172,6 +176,42 @@ class FUSION(object):
         predict = knn_reg.fit(offline_rss, offline_location).predict(online_rss)
         accuracy = self.square_accuracy(predict, online_location)
         return predict, accuracy
+    
+    # 支持向量机
+    def svm_reg(self, offline_rss, offline_location, online_rss, online_location):
+        clf_x = svm.SVR(C=1000, gamma=0.01)
+        clf_y = svm.SVR(C=1000, gamma=0.01)
+        clf_x.fit(offline_rss, offline_location[:, 0])
+        clf_y.fit(offline_rss, offline_location[:, 1])
+        x = clf_x.predict(online_rss)
+        y = clf_y.predict(online_rss)
+        predict = np.column_stack((x, y))
+        accuracy = self.square_accuracy(predict, online_location)
+        return predict, accuracy
+    
+    # 随机森林
+    def rf_reg(self, offline_rss, offline_location, online_rss, online_location):
+        estimator = RandomForestRegressor(n_estimators=150)
+        estimator.fit(offline_rss, offline_location)
+        predict = estimator.predict(online_rss)
+        accuracy = self.square_accuracy(predict, online_location)
+        return predict, accuracy
+
+    # 梯度提升
+    def dbdt(self, offline_rss, offline_location, online_rss, online_location):
+        clf = MultiOutputRegressor(ensemble.GradientBoostingRegressor(n_estimators=100, max_depth=10))
+        clf.fit(offline_rss, offline_location)
+        predict = clf.predict(online_rss)
+        accuracy = self.square_accuracy(predict, online_location)
+        return predict, accuracy
+    
+    # 多层感知机
+    def nn(self, offline_rss, offline_location, online_rss, online_location):
+        clf = MLPRegressor(hidden_layer_sizes=(100, 100))
+        clf.fit(offline_rss, offline_location)
+        predict = clf.predict(online_rss)
+        accuracy = self.square_accuracy(predict, online_location)
+        return predict, accuracy
 
 ###############################################################
 ######################   轨迹显示相关代码   #####################
@@ -241,7 +281,7 @@ class FUSION(object):
             
             l2, = plt.plot(x, y, c='blue')
             plt.scatter(x, y, c='red')
-            plt.legend(handles=[l1,l2],labels=['real tracks','knn predicting'],loc='best')
+            plt.legend(handles=[l1,l2],labels=['real tracks','wifi predicting'],loc='best')
             plt.show()
         else: # type == 'fusion
             pass
