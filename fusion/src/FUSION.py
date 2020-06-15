@@ -200,19 +200,20 @@ class FUSION(object):
 
     # 显示运动轨迹图，分为wifi、pdr、fusion三种类型
     def show_trace(self, type, **kw):
+        plt.grid()
         if 'real_trace' in kw:
                 real_trace = kw['real_trace'].T
                 trace_x = real_trace[0]
                 trace_y = real_trace[1]
                 l1, = plt.plot(trace_x, trace_y, color='g')
                 plt.scatter(trace_x, trace_y, color='orange')
-
-        plt.grid()
+                for k in range(0, len(trace_x)):
+                    plt.annotate(k, xy=(trace_x[k], trace_y[k]), xytext=(trace_x[k]+0.1,trace_y[k]+0.1), color='green')
         if type == 'pdr':
             if 'offset' in kw:
                 offset = kw['offset']
-            if 'predict' in kw:
-                predict = kw['predict'].T
+            if 'predict_trace' in kw:
+                predict = kw['predict_trace'].T
                 x = predict[0]
                 y = predict[1]
             else:
@@ -230,8 +231,8 @@ class FUSION(object):
             plt.legend(handles=[l1,l2],labels=['real tracks','pdr predicting'],loc='best')
             plt.show()
         elif type == 'wifi':
-            if 'predict' in kw:
-                predict = kw['predict'].T
+            if 'predict_trace' in kw:
+                predict = kw['predict_trace'].T
                 x = predict[0]
                 y = predict[1]
 
@@ -240,7 +241,6 @@ class FUSION(object):
             
             l2, = plt.plot(x, y, c='blue')
             plt.scatter(x, y, c='red')
-
             plt.legend(handles=[l1,l2],labels=['real tracks','knn predicting'],loc='best')
             plt.show()
         else: # type == 'fusion

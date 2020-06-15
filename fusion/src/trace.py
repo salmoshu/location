@@ -42,5 +42,5 @@ predict, accuracy = fusion.knn_reg(fingerprint_rssi, fingerprint_position, resul
 print('knn accuracy:', accuracy)
 
 # fusion.show_trace('pdr', real_trace=real_trace, offset=np.pi/2)
-fusion.show_trace('wifi', real_trace=real_trace, predict=predict)
+fusion.show_trace('wifi', real_trace=real_trace, predict_trace=predict)
 # fusion.show_steps()
