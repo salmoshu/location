@@ -10,6 +10,7 @@ WIFI信号强度矩阵
 numpy.ndarray
 '''
 
+import types
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import ensemble
@@ -170,8 +171,47 @@ class FUSION(object):
 #####################   WIFI指纹相关代码   #####################
 ###############################################################
 
+    def ml_limited_reg(self, type, offline_rss, offline_location, online_rss, online_location):
+        if type == 'knn':
+            k = 3
+            ml_reg = neighbors.KNeighborsRegressor(n_neighbors=k, weights='uniform', metric='euclidean')
+        elif type == 'rf':
+            ml_reg = RandomForestRegressor(n_estimators=10)
+
+        init_x = 0
+        init_y = 0
+        predict = np.array([[init_x, init_y]])
+        limited_rss = None
+        limited_location = None
+        offset = 2 # m
+
+        for k, v in enumerate(online_rss):
+            if k == 0:
+                continue
+            for v1, v2 in zip(offline_rss, offline_location):
+                if (v2[0] >= init_x-offset and v2[0] <= init_x+offset) and (v2[1] >= init_y-offset and v2[1] <= init_y+offset):
+                    v1 = v1.reshape(1, v1.size)
+                    v2 = v2.reshape(1, v2.size)
+                    if limited_rss is None:
+                        limited_rss = v1
+                        limited_location = v2
+                    else:
+                        limited_rss = np.concatenate((limited_rss, v1), axis=0)
+                        limited_location = np.concatenate((limited_location, v2), axis=0)
+            v = v.reshape(1, v.size)
+            predict_point = ml_reg.fit(limited_rss, limited_location).predict(v)
+            predict = np.concatenate((predict, predict_point), axis=0)
+            init_x = predict_point[0][0]
+            init_y = predict_point[0][1]
+            limited_rss = None
+            limited_location = None
+        
+        accuracy = self.square_accuracy(predict, online_location)
+        return predict, accuracy
+
     # knn regression
-    def knn_reg(self, offline_rss, offline_location, online_rss, online_location, k=3):
+    def knn_reg(self, offline_rss, offline_location, online_rss, online_location):
+        k = 3
         knn_reg = neighbors.KNeighborsRegressor(n_neighbors=k, weights='uniform', metric='euclidean')
         predict = knn_reg.fit(offline_rss, offline_location).predict(online_rss)
         accuracy = self.square_accuracy(predict, online_location)

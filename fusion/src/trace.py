@@ -9,8 +9,8 @@ if os.path.exists('C:/Users/salmos'):
 elif os.path.exists('C:/Users/salmo'):
     path = 'C:/Users/salmo/Desktop/location/fusion/experiment_data'
 
-walking_data_file = path + '/S-Type/SType-08.csv'
-real_trace_file = path + '/S-Type/RealTrace.csv'
+walking_data_file = path + '/Rectangle/Rectangle-01.csv'
+real_trace_file = path + '/Rectangle/RealTrace.csv'
 df_walking = pd.read_csv(walking_data_file) # 实验数据
 real_trace = pd.read_csv(real_trace_file).values # 真实轨迹
 
@@ -38,16 +38,24 @@ for k, v in enumerate(steps):
     result = np.concatenate((result,value),axis=0)
 
 # knn算法
-# predict, accuracy = fusion.knn_reg(fingerprint_rssi, fingerprint_position, result, real_trace, k=3)
+# predict, accuracy = fusion.knn_reg(fingerprint_rssi, fingerprint_position, result, real_trace)
 # print('knn accuracy:', accuracy, 'm')
+
+# 添加区域限制的knn回归
+predict, accuracy = fusion.ml_limited_reg('knn', fingerprint_rssi, fingerprint_position, result, real_trace)
+print('knn_limited accuracy:', accuracy, 'm')
 
 # svm算法
 # predict, accuracy = fusion.svm_reg(fingerprint_rssi, fingerprint_position, result, real_trace)
 # print('svm accuracy:', accuracy, 'm')
 
 # rf算法
-predict, accuracy = fusion.rf_reg(fingerprint_rssi, fingerprint_position, result, real_trace)
-print('rf accuracy:', accuracy, 'm')
+# predict, accuracy = fusion.rf_reg(fingerprint_rssi, fingerprint_position, result, real_trace)
+# print('rf accuracy:', accuracy, 'm')
+
+# 添加区域限制rf的rf算法
+# predict, accuracy = fusion.ml_limited_reg('rf', fingerprint_rssi, fingerprint_position, result, real_trace)
+# print('rf_limited accuracy:', accuracy, 'm')
 
 # gdbt算法
 # predict, accuracy = fusion.dbdt(fingerprint_rssi, fingerprint_position, result, real_trace)
