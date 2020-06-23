@@ -282,13 +282,13 @@ class FUSION(object):
     def show_trace(self, type, **kw):
         plt.grid()
         if 'real_trace' in kw:
-                real_trace = kw['real_trace'].T
-                trace_x = real_trace[0]
-                trace_y = real_trace[1]
-                l1, = plt.plot(trace_x, trace_y, color='g')
-                plt.scatter(trace_x, trace_y, color='orange')
-                for k in range(0, len(trace_x)):
-                    plt.annotate(k, xy=(trace_x[k], trace_y[k]), xytext=(trace_x[k]+0.1,trace_y[k]+0.1), color='green')
+            real_trace = kw['real_trace'].T
+            trace_x = real_trace[0]
+            trace_y = real_trace[1]
+            l1, = plt.plot(trace_x, trace_y, color='g')
+            plt.scatter(trace_x, trace_y, color='orange')
+            for k in range(0, len(trace_x)):
+                plt.annotate(k, xy=(trace_x[k], trace_y[k]), xytext=(trace_x[k]+0.1,trace_y[k]+0.1), color='green')
         if type == 'pdr':
             if 'offset' in kw:
                 offset = kw['offset']

@@ -14,8 +14,8 @@ real_trace_file = path + '/Rectangle/RealTrace.csv'
 df_walking = pd.read_csv(walking_data_file) # 实验数据
 real_trace = pd.read_csv(real_trace_file).values # 真实轨迹
 
-fingerprint_rssi_file = path + '/Fingerprint/rssi.csv'
-fingerprint_position_file = path + '/Fingerprint/position.csv'
+fingerprint_rssi_file = path + '/Fingerprint/rssi-1m.csv'
+fingerprint_position_file = path + '/Fingerprint/position-1m.csv'
 fingerprint_rssi = pd.read_csv(fingerprint_rssi_file).values # 指纹数据-信号强度
 fingerprint_position = pd.read_csv(fingerprint_position_file).values # 指纹数据-坐标点
 
@@ -65,6 +65,6 @@ print('knn_limited accuracy:', accuracy, 'm')
 # predict, accuracy = fusion.nn(fingerprint_rssi, fingerprint_position, result, real_trace)
 # print('nn accuracy:', accuracy, 'm')
 
-# fusion.show_trace('pdr', real_trace=real_trace, offset=np.pi/2)
+# fusion.show_trace('pdr', real_trace=real_trace, offset=0)
 fusion.show_trace('wifi', real_trace=real_trace, predict_trace=predict)
 # fusion.show_steps()
