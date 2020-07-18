@@ -141,6 +141,7 @@ class Model(object):
             plt.legend(handles=lines, labels=labels, loc='best')
             plt.xlabel('WiFi扫描次数/次')
             plt.ylabel('WiFi信号强度/dBm')
+            plt.xticks(range(0, length, int(length/5))) # 保证刻度为整数
             plt.show()
         
         return results[i][:length]
