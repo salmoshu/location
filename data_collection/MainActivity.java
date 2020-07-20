@@ -1,4 +1,4 @@
-package com.example.data;
+package com.example.data2;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,11 +24,20 @@ import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
+    // 配置路由器参数
+    private int[] levelArray = new int[8];
+    private String[] apNames = new String[]{"AP-01","AP-02","AP-03","AP-04","AP-05", "AP-06", "AP-07", "AP-08"};
+    private String rssis = "rssi1,rssi2,rssi3,rssi4,rssi5,rssi6,rssi7,rssi8";
+
+    private StringBuilder templateString = new StringBuilder(
+            "timestamp," +
+             rssis + "," +
+            "linear-x,linear-y,linear-z," +
+            "gravity-x,gravity-y,gravity-z," +
+            "rotation-x,rotation-y,rotation-z,rotation-w\n");
     private WifiBroadcastReceiver wifiReceiver;
     private List<ScanResult> wifiResultList = new ArrayList<>();
-    private StringBuilder dataStringBuilder = new StringBuilder("timestamp,rssi1,rssi2,rssi3,rssi4," +
-            "linear-x,linear-y,linear-z,gravity-x,gravity-y,gravity-z,rotation-x,rotation-y,rotation-z,rotation-w\n");
-    private int[] levelArray = new int[4];
+    private StringBuilder dataStringBuilder = templateString;
 
     private SensorManager sensorManager;
     private Sensor linear;
@@ -82,19 +91,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 // 没有实时数据的时候，保存老数据的值
                 dataStringBuilder.append(System.currentTimeMillis());
 
-                // 默认四个AP都存在，且SSID分别为
-                // EXPERIMENT-01 -02 -03 -04
+                // 更新wifi强度值
                 for(ScanResult scanResult:wifiResultList) {
-                    if(scanResult.SSID.equals("EXPERIMENT-01")) {
-                        levelArray[0] = scanResult.level;
-                    }else if(scanResult.SSID.equals("EXPERIMENT-02")) {
-                        levelArray[1] = scanResult.level;
-                    }else if(scanResult.SSID.equals("EXPERIMENT-03")) {
-                        levelArray[2] = scanResult.level;
-                    }else if(scanResult.SSID.equals("EXPERIMENT-04")) {
-                        levelArray[3] = scanResult.level;
-                    }else {
-                        continue;
+                    loop1:for(int i=0; i<apNames.length; i++) {
+                        if(scanResult.SSID.equals(apNames[i])) {
+                            levelArray[i] = scanResult.level;
+                            break loop1;
+                        }
                     }
                 }
 
@@ -140,8 +143,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         FileUtil.writeFile(fileName, dataStringBuilder.toString(), this);
 //        LogUtil.i("FILE", FileUtil.readFile(fileName, this));
 
-        dataStringBuilder = new StringBuilder("timestamp,rssi1,rssi2,rssi3,rssi4," +
-                "linear-x,linear-y,linear-z,gravity-x,gravity-y,gravity-z,rotation-x,rotation-y,rotation-z,rotation-w\n");
+        dataStringBuilder = templateString;
         levelArray = new int[4];
         counter = 0;
     }
@@ -172,8 +174,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     /*
-    *  以下部分为传感器数据api中的相关函数
-    * */
+     *  以下部分为传感器数据api中的相关函数
+     * */
 
     @Override
     public final void onAccuracyChanged(Sensor sensor, int accuracy) {
