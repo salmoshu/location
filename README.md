@@ -1,96 +1,463 @@
 # Location
 
-**Location**是一个多源数据融合定位的项目，目前包含了Wi-Fi指纹定位、行人航位推算（PDR），本项目针对的平台为安卓平台，融合使用的数据为Wi-Fi数据、加速度计数据、重力传感器数据、姿态仰角数据。
+**Location**是一个多源数据融合定位的项目，目前包含了Wi-Fi指纹定位、行人航位推算（PDR）与基于EKF的Wi-Fi
+
+指纹与PDR的融合定位，本项目针对的平台为安卓平台，融合使用的数据为Wi-Fi数据、加速度计数据、陀螺仪数据、重力传感器数据、姿态仰角数据。
 
 # 目录
 
 ------
 
-* [依赖工具包](#依赖工具包)
-* [文件目录](#文件目录)
-* [Get started](#get-started)
-    * [Step 1 Define the IMU model](#step-1-define-the-imu-model)
-    * [Step 2 Create a motion profile](#step-2-create-a-motion-profile)
+* [第三方依赖](#第三方依赖)
+* [工作目录](#工作目录)
+* [开始使用](#开始使用)
+    * [Demo1 PDR定位](#Demo1 PDR定位)
+    * [Demo2 Wi-Fi指纹定位](#Demo2 Wi-Fi指纹定位)
+    * [Demo3 融合定位](#Demo3 融合定位)
+* [实验流程](#实验流程)
+    * [第一步 开发安卓数据采集程序](#第一步 开发安卓数据采集程序)
+    * [第二步 Location库的基本介绍](#第二步 Location库的基本介绍)
     * [Step 3 Create your algorithm](#step-3-create-your-algorithm)
     * [Step 4 Run the simulation](#step-4-run-the-simulation)
     * [Step 5 Show results](#step-5-show-results)
 * [Acknowledgement](#Acknowledgement)
 
-# 依赖工具包
+# 第三方依赖
 
 - Numpy
 - Pandas
 - Matplotlib
 - Sklearn
 
-# 文件目录
+# 工作目录
 
-data:
-
-| 文件名 | 描述 |
+| demo                   | 演示文件                                                     |
 |:--|---|
-| still | 静止数据 |
-| linear_8m | 手机x轴与重力方向垂直，以正常步频行走8m（08m*10） |
-| demo_free_integration.py | A demo of a simple strapdown system. The simulation runs for 1000 times. The statistics of the INS results of the 1000 simulations are generated.|
-| demo_inclinometer_mahony.py | A demo of an dynamic inclinometer algorithm based on Mahony's theory. This demo shows how to generate error plot of interested data.|
-| demo_aceinna_vg.py | A demo of DMU380 dynamic tilt algorithm. The algorithm is first compiled as a shared library. This demo shows how to call the shared library. This is the algorithm inside Aceinna's VG/MTLT products.|
-| demo_aceinna_ins.py | A demo of DMU380 GNSS/INS fusion algorithm. The algorithm is first compiled as a shared library. This demo shows how to call the shared library. This is the algorithm inside Aceinna's INS products.|
-| demo_multiple_algorithms.py | A demo of multiple algorithms in a simulation. This demo shows how to compare resutls of multiple algorithm.|
-| demo_gen_data_from_files.py | This demo shows how to do simulation from logged data files.|
+| demo_data_analysis.py  |                                                              |
+| demo_ekf_experiment.py |                                                              |
+| demo_ekf_simulation.py |                                                              |
+| demo_pdr.py            |                                                              |
+| demo_wifi.py           |                                                              |
+| kf1d.py                |                                                              |
+| process_fingerprint.py |                                                              |
+| simulation_trace.npy   |                                                              |
+| **data_collection**    | **数据采集程序**                                             |
+| activity_main.xml      | 替换位置：项目目录\程序名\app\src\main\res\layout            |
+| AndroidManifest.xml    | 替换位置：项目目录\程序名\app\src\main                       |
+| FileUtil.java          | 替换位置：项目目录\程序名\app\src\main\java\com\example\data |
+| LogUtil.java           | 替换位置：项目目录\程序名\app\src\main\java\com\example\data |
+| MainActivity.java      | 替换位置：项目目录\程序名\app\src\main\java\com\example\data |
+| WifiUtil.java          | 替换位置：项目目录\程序名\\app\src\main\java\com\example\data |
+| **data** | **实验数据** |
+| data/count_steps | 正常直线行走数据，包含了安卓或苹果设备采集的数据，用来判断步伐检测的结果是否良好，其中安卓程序为自己开发的程序，苹果数据采集程序为phyphox（使用的时候注意修改属性名，方便后续程序使用）。 |
+| data/fusion01          | 第一次融合定位实验，由于安卓Wi-Fi扫描频率较低，不能满足事实定位，因为在实际实验的时候每一个状态维持的时间大约在3s以上，具体数据包含了：Fingerprint（指纹数据）、Rectangle（矩阵路线行走数据）和SType（S型路线行走数据）。 |
+| data/fusion02          |                                                              |
+| data/linear_08m        | 正常直线行走数据，行走步数为10步，每一步为固定步长0.8m。     |
+| data/rssi_fluctuation  | 一组长时间记录Wi-Fi变化的数据，每个文件大约记录2万条样本数据，该数据可以用来分析Wi-Fi数据的波动情况。 |
+| data/still             | 静止数据，用来分析惯性传感器数据的特性。                     |
+| **location**           | **自定义定位工具包（可以进行数据分析与处理、定位解算与可视化，不同文件可配合使用）** |
+| location/analysis.py   | 分析Wi-Fi数据的特性，可以合并到wifi.py中。                   |
+| location/fusion.py     | 融合定位工具包，包含了EKF融合定位算法。                      |
+| locaiton/pdr.py        | PDR定位工具包，包含了步伐检测、航向角推算、步长推算和定位结束输出等常见功能。 |
+| location/wifi.py       | wifi指纹定位工具包，包含了常见的在线匹配算法。               |
 
-# Get started
 
-## Step 1 Define the IMU model
 
-### Step 1.1 Define the IMU error model
+# 开始使用
 
-IMU error model can be specified in two ways:
+Location模块的wifi和fusion功能使用前提（pdr由于不使用wifi数据因此不受影响）：操作的文件格式大概为如下所示，其中rssi根据实验过程中AP数量决定。
 
-#### Choose a built-in model
+| timestamp     | rssi1 (dbm) | rssi2 (dbm) | rssi3 (dbm) | rssi4 (dbm) | linear-x(m/s) | linear-y(m/s) | linear-z(m/s) | gravity-x(m/s) | gravity-y(m/s) | gravity-z(m/s) | rotation-x | rotation-y | rotation-z | rotation-w |
+| ------------- | ----------- | ----------- | ----------- | ----------- | ------------- | ------------- | ------------- | -------------- | -------------- | -------------- | ---------- | ---------- | ---------- | ---------- |
+| 1591610015190 | -37         | -45         | -66         | -64         | 0.1322        | -0.0105       | 0.5227        | 0.4463         | 2.8838         | 9.3623         | 0.078042   | -0.12869   | -0.75696   | 0.635895   |
+| ...           | ...         | ...         | ...         | ...         | ...           | ...           | ...           | ...            | ...            | ...            | ...        | ...        | ...        | ...        |
 
-There are three built-in IMU models: 'low-accuracy', 'mid-accuracy' and 'high accuracy'.
-
-#### Manually define the model
-
-```python
-imu_err = {
-            # gyro bias, deg/hr
-            'gyro_b': np.array([0.0, 0.0, 0.0]),
-            # gyro angle random walk, deg/rt-hr
-            'gyro_arw': np.array([0.25, 0.25, 0.25]),
-            # gyro bias instability, deg/hr
-            'gyro_b_stability': np.array([3.5, 3.5, 3.5]),
-            # gyro bias instability correlation, sec.
-            # set this to 'inf' to use a random walk model
-            # set this to a positive real number to use a first-order Gauss-Markkov model
-            'gyro_b_corr': np.array([100.0, 100.0, 100.0]),
-            # accelerometer bias, m/s^2
-            'accel_b': np.array([0.0e-3, 0.0e-3, 0.0e-3]),
-            # accelerometer velocity random walk, m/s/rt-hr
-            'accel_vrw': np.array([0.03119, 0.03009, 0.04779]),
-            # accelerometer bias instability, m/s^2
-            'accel_b_stability': np.array([4.29e-5, 5.72e-5, 8.02e-5]),
-            # accelerometer bias instability correlation, sec. Similar to gyro_b_corr
-            'accel_b_corr': np.array([200.0, 200.0, 200.0]),
-            # magnetometer noise std, uT
-            'mag_std': np.array([0.2, 0.2, 0.2])
-          }
-```
-
-### Step 1.2 Create an IMU object
+可以利用pandas读取数据，并获取为numpy.ndarray格式数据，location模块中类的参数均为numpy.ndarray格式。
 
 ```python
-imu = imu_model.IMU(accuracy=imu_err, axis=6, gps=False)
-imu = imu_model.IMU(accuracy='low accuracy', axis=9, gps=True)
+df = pd.read_csv(file)
+rssi = df[[col for col in df.columns if 'rssi' in col]].values
+linear = df[[col for col in df.columns if 'linear' in col]].values
+gravity = df[[col for col in df.columns if 'gravity' in col]].values
+rotation = df[[col for col in df.columns if 'rotation' in col]].values
 ```
 
-axis = 6 to generate only gyro and accelerometer data.
+## Demo1 PDR定位
 
-axis = 9 to generate magnetometer data besides gyro and accelerometer data.
+要进行PDR操作，需要创建一个`pdr.Model`对象：
 
-gps = True to generate GPS data, gps = False not.
+```python
+import location.pdr as pdr
+pdr = pdr.Model(linear, gravity, rotation)
+```
 
-## Step 2 Create a motion profile
+### Demo1.1 show_steps函数：显示垂直方向合加速度与步伐波峰分布
+
+`show_steps`参数使用说明如下：
+
+- **frequency** - 数据采集频率
+- **walkType** - 行走模式
+
+| walkType | 描述                                                         |
+| :------- | :----------------------------------------------------------- |
+| normal   | 正常行走模式。                                               |
+| fusion   | 实验行走模式。在做Wi-Fi指纹与PDR融合定位的时候，由于安卓设备Wi-Fi扫描有一定的时间间隔，所以在实验的过程中，两步之间的控制时间大于3s，所以算法部分进行了不同处理。 |
+
+示例1，对data/linear_08m中的数据进行分析。
+
+```python
+pdr.show_steps(frequency=70, walkType='normal')
+```
+
+结果如下：
+
+![](.\image\Demo1_1.png)
+
+示例2，对fusion01/SType中的数据进行分析。
+
+```pytyon
+pdr.show_steps(frequency=70, walkType='fusion')
+```
+
+结果如下：
+
+![](.\image\Demo1_2.png)
+
+可以发现，对比示例1中的结果，该图峰值之间的间隔比较大。
+
+### Demo1.2 show_gaussian函数：查看数据在一定范围内的分布情况
+
+用来判断数据的分布情况，同时可利用高斯函数拟合（可选），可以用来分析静止惯性数据。
+
+`show_gaussian`参数使用说明如下：
+
+- **data** - 某一轴加速度数据
+- **fit** - 布尔值，是否进行高斯拟合
+
+示例1，对data/still中的静止数据进行分析。
+
+```python
+acc_z = linear[:,2]
+pdr.show_gaussian(acc_z, True)
+```
+
+结果如下：
+
+![](.\image\Demo1_3.png)
+
+示例2，对data/linear_08m中的数据及进行分析：
+
+```python
+acc_z = linear[:,2]
+pdr.show_gaussian(acc_z, False)
+```
+
+结果如下：
+
+![](.\image\Demo1_4.png)
+
+### Demo1.3 show_data函数：查看三轴加速度的分布情况
+
+`show_data`参数使用说明如下：
+
+| dataType | 描述                         |
+| :------- | :--------------------------- |
+| linear   | 查看三轴线性加速度的分布情况 |
+| gravity  | 查看三轴重力加速度的分布情况 |
+| rotation | 查看旋转四元数的数据分布情况 |
+
+示例1，对data/linear_08m中的数据及行分析：
+
+```python
+pdr.show_data("linear")
+```
+
+结果如下：
+
+![](.\image\Demo1_5.png)
+
+示例2，对data/linear_08m中的数据及行分析：
+
+```python
+pdr.show_data("gravity")
+```
+
+结果如下：
+
+![](.\image\Demo1_6.png)
+
+示例3，对data/linear_08m中的数据及行分析：
+
+```python
+pdr.show_data("rotation")
+```
+
+结果如下：
+
+![](.\image\Demo1_7.png)
+
+### Demo1.4 step_stride函数：步长推算函数
+
+`step_stride`传入的是某一时刻的函数值，往往是垂直方向合加速度的峰值点，从而推算出步长值。
+
+```python
+stride_length = pdr.step_stride(acc)
+```
+
+### Demo1.5 step_counter函数：获取数据中的步伐信息
+
+`step_counter`会返回一个包含每一个步伐信息的字典类型数组，其中index为样本序号，acceleration为步伐加速度峰值，函数参数使用说明如下：
+
+- **frequency** - 数据采集频率
+- **walkType** - 行走模式
+
+| walkType | 描述                                                         |
+| :------- | :----------------------------------------------------------- |
+| normal   | 正常行走模式。                                               |
+| fusion   | 实验行走模式。在做Wi-Fi指纹与PDR融合定位的时候，由于安卓设备Wi-Fi扫描有一定的时间间隔，所以在实验的过程中，两步之间的控制时间大于3s，所以算法部分进行了不同处理。 |
+
+示例1，对data/linear_08m中的数据进行分析。
+
+```python
+pdr.show_steps(frequency=70, walkType='normal')
+print(steps)
+```
+
+结果如下：
+
+```python
+[
+    {
+        'index': 298,
+        'acceleration': 3.88391844277864
+    },
+    {
+        'index': 354,
+        'acceleration': 6.163800299609754
+    },
+    ......
+]
+```
+
+示例2，利用data/linear_08m中的数据分析步长推算算法的准确度：
+
+```python
+steps = pdr.step_counter(frequency=70, walkType='normal')
+print('steps:', len(steps))
+stride = pdr.step_stride
+accuracy = []
+for v in steps:
+    a = v['acceleration']
+    print(stride(a))
+    accuracy.append(
+        np.abs(stride(a)-0.8)
+    )
+square_sum = 0
+for v in accuracy:
+    square_sum += v*v
+acc_mean = (square_sum/len(steps))**(1/2)
+print("mean: %f" % acc_mean) # 平均误差
+print("min: %f" % np.min(accuracy)) # 最小误差
+print("max: %f" % np.max(accuracy)) # 最大误差
+print("sum: %f" % np.sum(accuracy)) # 累积误差
+```
+
+结果如下：
+
+```shell
+steps: 10
+0.7019198589090117
+0.7878293284920566
+0.8188530449804803
+0.7910022847592212
+0.7700272110821945
+0.7766284915404985
+0.8636455533175651
+0.7555013698705025
+0.8041832313898543
+0.8379454829417488
+mean: 0.043746
+min: 0.004183
+max: 0.098080
+sum: 0.341719
+```
+
+### Demo1.6 step_heading函数：步长推算函数
+
+实验过程中手机采用HOLDING模式，即手握手机放在胸前，并且x轴与地面平行，`step_heading`直接返回每一时刻的偏航角yaw值，初始值设为0。
+
+```python
+yaw = pdr.step_heading()
+```
+
+### Demo1.7 pdr_position函数：获取数据中的步伐信息
+
+`pdr_position`会返回每一步的x、y坐标值，以及每一步的步长和航向角：
+
+- **frequency** - 数据采集频率
+- **walkType** - 行走模式
+- **offset** - 初始航向角大小
+
+| walkType | 描述                                                         |
+| :------- | :----------------------------------------------------------- |
+| normal   | 正常行走模式。                                               |
+| fusion   | 实验行走模式。在做Wi-Fi指纹与PDR融合定位的时候，由于安卓设备Wi-Fi扫描有一定的时间间隔，所以在实验的过程中，两步之间的控制时间大于3s，所以算法部分进行了不同处理。 |
+
+示例：
+
+```python
+position_x, position_y, strides, angle = pdr.show_steps(frequency=70, walkType='fusion'， offset=np.pi/2)
+```
+
+### Demo1.8 show_trace函数：获取数据中的步伐信息
+
+`show_trace`内部使用了`pdr_position`，可以输出轨迹图像。
+
+- **frequency** - 数据采集频率
+- **walkType** - 行走模式
+- **offset** - 初始航向角大小（可选）
+- **realTrace** - 真是轨迹坐标（可选）
+
+| walkType | 描述                                                         |
+| :------- | :----------------------------------------------------------- |
+| normal   | 正常行走模式。                                               |
+| fusion   | 实验行走模式。在做Wi-Fi指纹与PDR融合定位的时候，由于安卓设备Wi-Fi扫描有一定的时间间隔，所以在实验的过程中，两步之间的控制时间大于3s，所以算法部分进行了不同处理。 |
+
+示例1，显示data/SType数据的预测轨迹图：
+
+```python
+pdr.show_trace(frequency=70, walkType='fusion')
+```
+
+结果如下：
+
+![](.\image\Demo1_8.png)
+
+示例2，显示data/SType数据的预测轨迹图：
+
+```python
+pdr.show_trace(frequency=70, walkType='fusion', offset=np.pi/2, real_trace=real_trace)
+```
+
+结果如下：
+
+![](.\image\Demo1_9.png)
+
+## Demo2 Wi-Fi指纹定位
+
+这一部分如果想了解更多，请参考我在csdn写的博客：https://blog.csdn.net/qq_28675933/article/details/103668811。
+
+### Demo2.1 安装Android Studio
+
+从安卓官网上下载并安装安卓开发工具：https://developer.android.com/studio。
+
+### Demo2.2 新建项目并替换掉相关文件
+
+使用Android Studio新建一个空项目以后，用data_collection中的文件替换掉空项目中的文件，替换的时候注意修改第一行的包名。
+
+### Demo2.3 修改文件代码参数
+
+
+
+## Demo3 融合定位
+
+这一部分如果想了解更多，请参考我在csdn写的博客：https://blog.csdn.net/qq_28675933/article/details/103668811。
+
+### Demo3.1 安装Android Studio
+
+从安卓官网上下载安卓开发工具：https://developer.android.com/studio。
+
+### Demo3.2 新建项目并替换掉相关文件
+
+使用Android Studio新建一个空项目以后，用data_collection中的文件替换掉空项目中的文件，替换的时候注意修改第一行的包名。
+
+### Demo3.3 修改文件代码参数
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 实验流程
+
+## 第一步 开发安卓数据采集程序
+
+这一部分如果想了解更多，请参考我在csdn写的博客：https://blog.csdn.net/qq_28675933/article/details/103668811。
+
+### Step 1.1 安装Android Studio
+
+从安卓官网上下载并安装安卓开发工具：https://developer.android.com/studio。
+
+### Step 1.2 新建项目并替换掉相关文件
+
+使用Android Studio新建一个空项目以后，用data_collection中的文件替换掉空项目中的文件，替换的时候注意修改第一行的包名。
+
+### Step 1.3 修改文件代码参数
+
+做与WiFi相关的实验时，一般都是使用固定好的路由器，路由器的MAC或者SSID已知，因此需要修改MainActivity.java文件中路由器参数，方便做后续实验。需要修改的参数为`levelArray`、`apNames`、`rssis`，现在假设实验的路由器SSID分别为`router-01`、`router-02`、`router-03`、`router-04`，则需要修改为如下所示：
+
+```java
+package com.example.yourappname;
+
+import ...
+
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
+    // 配置路由器参数
+    private int[] levelArray = new int[4];
+    private String[] apNames = new String[]{"router-01","router-02","router-03","router-04"};
+    private String rssis = "rssi1,rssi2,rssi3,rssi4";
+   
+    ...
+```
+
+其中`rssis`必须命名为`"rssi"`的形式。
+
+### Step 1.4 采集数据并导出
+
+使用程序的时候，注意给程序“存储”与“位置”权限，对于采集好的数据，使用adb工具导出，adb工具在Android Studio安装好并且完成初始化之后就捆绑安装。为了方便操作，在环境变量里面配置了adb，这样方便全局操作，adb工具的位置一般在`C:\Users\username\AppData\Local\Android\Sdk\platform-tools`，一次实例操作如下所示。
+
+```powershell
+PS C:\user\salmo\Desktop> adb shell
+HWFRD:/ $ su
+HWFRD:/ # cp -R /data/data/com.example.data2 /sdcard/documents
+HWFRD:/ # exit
+HWFRD:/ $ exit
+PS C:\Users\salmo\Desktop> adb pull /sdcard/documents
+/sdcard/documents/: 4 files pulled, 0 skipped. 4.7 MB/s (478123 bytes in 0.096s)
+PS C:\Users\salmo\Desktop>
+```
+
+由于权限问题，数据先导出到sd卡中，再由sd卡导出到电脑里面，整个过程不算太容易，欢迎大家自寻更好的数据导出方法。
+
+### Step 1.5 数据文件
+
+一个使用该程序采集的数据文件大概长这个样子：
+
+| timestamp     | rssi1 (dbm) | rssi2 (dbm) | rssi3 (dbm) | rssi4 (dbm) | linear-x(m/s) | linear-y(m/s) | linear-z(m/s) | gravity-x(m/s) | gravity-y(m/s) | gravity-z(m/s) | rotation-x | rotation-y | rotation-z | rotation-w |
+| ------------- | ----------- | ----------- | ----------- | ----------- | ------------- | ------------- | ------------- | -------------- | -------------- | -------------- | ---------- | ---------- | ---------- | ---------- |
+| 1591610015190 | -37         | -45         | -66         | -64         | 0.1322        | -0.0105       | 0.5227        | 0.4463         | 2.8838         | 9.3623         | 0.078042   | -0.12869   | -0.75696   | 0.635895   |
+| ...           | ...         | ...         | ...         | ...         | ...           | ...           | ...           | ...            | ...            | ...            | ...        | ...        | ...        | ...        |
+
+
+
+## 第二步 Location库的基本介绍
 
 A motion profile specifies the initial states of the vehicle and motion command that drives the vehicle to move, as shown in the following table.
 

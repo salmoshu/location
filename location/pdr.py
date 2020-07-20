@@ -11,8 +11,10 @@
 numpy.ndarray
 '''
 
+import math
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 
 class Model(object):
     def __init__(self, linear, gravity, rotation):
@@ -126,6 +128,9 @@ class Model(object):
     # 根据姿势直接使用yaw
     def step_heading(self):
         _, _, yaw = self.quaternion2euler()
+        init_theta = yaw[0] # 初始角度
+        for i,v in enumerate(yaw):
+            yaw[i] = v-init_theta
         return yaw
     
     '''
@@ -135,7 +140,6 @@ class Model(object):
     def pdr_position(self, frequency=100, walkType='normal', offset=0):
         init_step = (0, 0)
         yaw = self.step_heading()
-        init_theta = yaw[0] # 初始角度
 
         steps = self.step_counter(frequency=frequency, walkType=walkType)
         position_x = []
@@ -145,12 +149,12 @@ class Model(object):
         position_x.append(x)
         position_y.append(y)
         strides = []
-        angle = [init_theta]
+        angle = [offset]
         for v in steps:
             index = v['index']
             length = self.step_stride(v['acceleration'])
             strides.append(length)
-            theta = yaw[index] - init_theta + offset
+            theta = yaw[index] + offset
             angle.append(theta)
             x = x + length*np.sin(theta)
             y = y + length*np.cos(theta)
@@ -181,12 +185,14 @@ class Model(object):
             verticalalignment='top', bbox=props)
         plt.plot(a_vertical)
         plt.scatter(index_test, value_test, color='r')
+        plt.xlabel('samples')
+        plt.ylabel('vertical acceleration')
         plt.show()
 
     '''
         输出一个数据分布散点图, 用来判断某一类型数据的噪声分布情况, 通常都会是高斯分布, 
     '''
-    def show_gaussian(self, data):
+    def show_gaussian(self, data, fit):
         wipe = 150
         data = data[wipe:len(data)-wipe]
         division = 100
@@ -212,33 +218,96 @@ class Model(object):
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14,
             verticalalignment='top', bbox=props)
+        plt.scatter(index, counter, label='distribution')
 
-        plt.scatter(index, counter)
+        if fit==True:
+            length = math.ceil((acc_max-acc_min)/interval)
+            counterArr = length * [0]
+            for value in data:
+                key = int((value - acc_min) / interval)
+                if key >=0 and key <length:
+                    counterArr[key] += 1
+            normal_mean = np.mean(data)
+            normal_sigma = np.std(data)
+            normal_x = np.linspace(acc_min, acc_max, 100)
+            normal_y = norm.pdf(normal_x, normal_mean, normal_sigma)
+            normal_y = normal_y * np.max(counterArr) / np.max(normal_y)
+            ax.plot(normal_x, normal_y, 'r-', label='fitting')
+
+        plt.xlabel('acceleration')
+        plt.ylabel('total samples')
+        plt.legend()
         plt.show()
 
     '''
         显示三轴加速度的变化情况
     '''
-    def show_acc(self):
-        linear = self.linear
-        x = linear[:,0]
-        y = linear[:,1]
-        z = linear[:,2]
-        index = range(len(x))
-        
-        ax1 = plt.subplot(2,2,1) #第一行第一列图形
-        ax2 = plt.subplot(2,2,2) #第一行第二列图形
-        ax3 = plt.subplot(2,1,2) #第二行
-        plt.sca(ax1)
-        plt.title('x')
-        plt.scatter(index,x)
-        plt.sca(ax2)
-        plt.title('y')
-        plt.scatter(index,y)
-        plt.sca(ax3)
-        plt.title('z')
-        plt.scatter(index,z)
-        plt.show()
+    def show_data(self, dataType):
+        if dataType=='linear':
+            linear = self.linear
+            x = linear[:,0]
+            y = linear[:,1]
+            z = linear[:,2]
+            index = range(len(x))
+            
+            ax1 = plt.subplot(3,1,1) #第一行第一列图形
+            ax2 = plt.subplot(3,1,2) #第一行第二列图形
+            ax3 = plt.subplot(3,1,3) #第二行
+            plt.sca(ax1)
+            plt.title('x')
+            plt.scatter(index,x)
+            plt.sca(ax2)
+            plt.title('y')
+            plt.scatter(index,y)
+            plt.sca(ax3)
+            plt.title('z')
+            plt.scatter(index,z)
+            plt.show()
+        elif dataType=='gravity':
+            gravity = self.gravity
+            x = gravity[:,0]
+            y = gravity[:,1]
+            z = gravity[:,2]
+            index = range(len(x))
+            
+            ax1 = plt.subplot(3,1,1) #第一行第一列图形
+            ax2 = plt.subplot(3,1,2) #第一行第二列图形
+            ax3 = plt.subplot(3,1,3) #第二行
+            plt.sca(ax1)
+            plt.title('x')
+            plt.scatter(index,x)
+            plt.sca(ax2)
+            plt.title('y')
+            plt.scatter(index,y)
+            plt.sca(ax3)
+            plt.title('z')
+            plt.scatter(index,z)
+            plt.show()
+        else: # rotation
+            rotation = self.rotation
+            x = rotation[:,0]
+            y = rotation[:,1]
+            z = rotation[:,2]
+            w = rotation[:,3]
+            index = range(len(x))
+            
+            ax1 = plt.subplot(4,1,1) #第一行第一列图形
+            ax2 = plt.subplot(4,1,2) #第一行第二列图形
+            ax3 = plt.subplot(4,1,3) #第二行
+            ax4 = plt.subplot(4,1,4) #第二行
+            plt.sca(ax1)
+            plt.title('x')
+            plt.scatter(index,x)
+            plt.sca(ax2)
+            plt.title('y')
+            plt.scatter(index,y)
+            plt.sca(ax3)
+            plt.title('z')
+            plt.scatter(index,z)
+            plt.sca(ax4)
+            plt.title('w')
+            plt.scatter(index,w)
+            plt.show()
 
     '''
         显示PDR运动轨迹图
