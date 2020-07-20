@@ -112,7 +112,7 @@ pdr.show_steps(frequency=70, walkType='normal')
 结果如下：
 
 
-![](https://github.com/salmoshu/location/tree/master/image/Demo1_1.png)
+![](https://github.com/salmoshu/location/tree/raw/master/image/Demo1_1.png)
 
 示例2，对fusion01/SType中的数据进行分析。
 
