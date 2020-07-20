@@ -31,6 +31,10 @@
 
 # 工作目录
 
+<<<<<<< HEAD
+=======
+|:--|---|
+>>>>>>> 0190941f5617cc6d62d79c0c80b734fa227ce9ce
 | **data_collection**    | **数据采集程序**                                             |
 |:--|---|
 | activity_main.xml      | 替换位置：项目目录\程序名\app\src\main\res\layout            |
@@ -102,6 +106,10 @@ pdr.show_steps(frequency=70, walkType='normal')
 
 结果如下：
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0190941f5617cc6d62d79c0c80b734fa227ce9ce
 ![](https://github.com/salmoshu/location/raw/master/image/Demo1_1.png)
 
 示例2，对fusion01/SType中的数据进行分析。
