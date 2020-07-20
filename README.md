@@ -31,16 +31,6 @@
 
 # 工作目录
 
-| demo                   | 演示文件                                                     |
-|:--|---|
-| demo_data_analysis.py  |                                                              |
-| demo_ekf_experiment.py |                                                              |
-| demo_ekf_simulation.py |                                                              |
-| demo_pdr.py            |                                                              |
-| demo_wifi.py           |                                                              |
-| kf1d.py                |                                                              |
-| process_fingerprint.py |                                                              |
-| simulation_trace.npy   |                                                              |
 | **data_collection**    | **数据采集程序**                                             |
 | activity_main.xml      | 替换位置：项目目录\程序名\app\src\main\res\layout            |
 | AndroidManifest.xml    | 替换位置：项目目录\程序名\app\src\main                       |
