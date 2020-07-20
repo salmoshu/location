@@ -13,12 +13,12 @@ import location.fusion as fusion
 '''
 
 sigma_wifi = 2
-sigma_pdr = .1
+sigma_pdr = .5
 sigma_yaw = 15/360
 angle_offset = 0
 # 初始状态
-# X = np.matrix('0; 0; 0')
-X = np.matrix('2; 2; 0') # 对初始状态进行验证
+X = np.matrix('0; 0; 0')
+# X = np.matrix('2; 2; 0') # 对初始状态进行验证
 
 path = os.path.abspath(os.path.join(os.getcwd(), "./data"))
 walking_data_file = path + '/fusion01/Rectangle/Rectangle-01.csv'
@@ -134,7 +134,7 @@ def jacobF_func(i):
 S = fusion.ekf2d(
     transition_states = transition_states # 状态数组
    ,observation_states = observation_states # 观测数组
-   ,transition_func = state_conv # 状态预测函数
+   ,transition_func = state_conv # 状态预测函数（传入参数为数组格式，该数组包含了用到的状态转换遇到的数据）
    ,jacobF_func = jacobF_func # 一阶线性的状态转换公式
    ,initial_state_covariance = P
    ,observation_matrices = H
