@@ -31,6 +31,7 @@
 
 # 工作目录
 
+|:--|---|
 | **data_collection**    | **数据采集程序**                                             |
 | activity_main.xml      | 替换位置：项目目录\程序名\app\src\main\res\layout            |
 | AndroidManifest.xml    | 替换位置：项目目录\程序名\app\src\main                       |
