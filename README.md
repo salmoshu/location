@@ -31,17 +31,8 @@
 
 # 工作目录
 
-| demo                   | 演示文件                                                     |
-|:--|---|
-| demo_data_analysis.py  |                                                              |
-| demo_ekf_experiment.py |                                                              |
-| demo_ekf_simulation.py |                                                              |
-| demo_pdr.py            |                                                              |
-| demo_wifi.py           |                                                              |
-| kf1d.py                |                                                              |
-| process_fingerprint.py |                                                              |
-| simulation_trace.npy   |                                                              |
 | **data_collection**    | **数据采集程序**                                             |
+|:--|---|
 | activity_main.xml      | 替换位置：项目目录\程序名\app\src\main\res\layout            |
 | AndroidManifest.xml    | 替换位置：项目目录\程序名\app\src\main                       |
 | FileUtil.java          | 替换位置：项目目录\程序名\app\src\main\java\com\example\data |
@@ -111,7 +102,7 @@ pdr.show_steps(frequency=70, walkType='normal')
 
 结果如下：
 
-![](.\image\Demo1_1.png)
+![](https://github.com/salmoshu/location/raw/master/image/Demo1_1.png)
 
 示例2，对fusion01/SType中的数据进行分析。
 
@@ -121,7 +112,7 @@ pdr.show_steps(frequency=70, walkType='fusion')
 
 结果如下：
 
-![](.\image\Demo1_2.png)
+![](https://github.com/salmoshu/location/raw/master/image/Demo1_2.png)
 
 可以发现，对比示例1中的结果，该图峰值之间的间隔比较大。
 
@@ -143,7 +134,7 @@ pdr.show_gaussian(acc_z, True)
 
 结果如下：
 
-![](.\image\Demo1_3.png)
+![](https://github.com/salmoshu/location/raw/master/image/Demo1_3.png)
 
 示例2，对data/linear_08m中的数据及进行分析：
 
@@ -154,7 +145,7 @@ pdr.show_gaussian(acc_z, False)
 
 结果如下：
 
-![](.\image\Demo1_4.png)
+![](https://github.com/salmoshu/location/raw/master/image/Demo1_4.png)
 
 ### Demo1.3 show_data函数：查看三轴加速度的分布情况
 
@@ -174,7 +165,7 @@ pdr.show_data("linear")
 
 结果如下：
 
-![](.\image\Demo1_5.png)
+![](https://github.com/salmoshu/location/raw/master/image/Demo1_5.png)
 
 示例2，对data/linear_08m中的数据及行分析：
 
@@ -184,7 +175,7 @@ pdr.show_data("gravity")
 
 结果如下：
 
-![](.\image\Demo1_6.png)
+![](https://github.com/salmoshu/location/raw/master/image/Demo1_6.png)
 
 示例3，对data/linear_08m中的数据及行分析：
 
@@ -194,7 +185,7 @@ pdr.show_data("rotation")
 
 结果如下：
 
-![](.\image\Demo1_7.png)
+![](https://github.com/salmoshu/location/raw/master/image/Demo1_7.png)
 
 ### Demo1.4 step_stride函数：步长推算函数
 
@@ -331,7 +322,7 @@ pdr.show_trace(frequency=70, walkType='fusion')
 
 结果如下：
 
-![](.\image\Demo1_8.png)
+![](https://github.com/salmoshu/location/raw/master/image/Demo1_8.png)
 
 示例2，显示data/SType数据的预测轨迹图：
 
@@ -341,7 +332,7 @@ pdr.show_trace(frequency=70, walkType='fusion', offset=np.pi/2, real_trace=real_
 
 结果如下：
 
-![](.\image\Demo1_9.png)
+![](https://github.com/salmoshu/location/raw/master/image/Demo1_9.png)
 
 ## Demo2 Wi-Fi指纹定位
 
