@@ -21,15 +21,13 @@ X = np.matrix('0; 0; 0')
 # X = np.matrix('2; 2; 0') # 对初始状态进行验证
 
 path = os.path.abspath(os.path.join(os.getcwd(), "./data"))
-walking_data_file = path + '/fusion01/Rectangle/Rectangle-01.csv'
+
 real_trace_file = path + '/fusion01/Rectangle/RealTrace.csv'
-fingerprint_rssi_file = path + '/fusion01/Fingerprint/rssi_1m.csv'
-fingerprint_position_file = path + '/fusion01/Fingerprint/position_1m.csv'
+walking_data_file = path + '/fusion01/Rectangle/Rectangle-01.csv'
+fingerprint_path = path + '/fusion01/Fingerprint'
 
 df_walking = pd.read_csv(walking_data_file) # 实验数据
 real_trace = pd.read_csv(real_trace_file).values # 真实轨迹
-fingerprint_rssi = pd.read_csv(fingerprint_rssi_file).values # 指纹数据-信号强度
-fingerprint_position = pd.read_csv(fingerprint_position_file).values # 指纹数据-坐标点
 
 # 主要特征参数
 rssi = df_walking[[col for col in df_walking.columns if 'rssi' in col]].values
@@ -40,6 +38,9 @@ rotation = df_walking[[col for col in df_walking.columns if 'rotation' in col]].
 pdr = pdr.Model(linear, gravity, rotation)
 wifi = wifi.Model(rssi)
 fusion = fusion.Model()
+
+# 指纹数据
+fingerprint_rssi, fingerprint_position = wifi.create_fingerprint(fingerprint_path)
 
 # 找到峰值出的rssi值
 steps = pdr.step_counter(frequency=70, walkType='fusion')
@@ -105,8 +106,6 @@ for k, v in enumerate(angle):
     ]))
 theta_counter = 0
 
-S = [] # 融合估计位置
-S.append(X)
 # 状态协方差矩阵（初始状态不是非常重要，经过迭代会逼近真实状态）
 P = np.matrix([[1, 0, 0],
                [0, 1, 0],

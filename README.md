@@ -399,7 +399,7 @@ rssi, position = wifi.create_fingerprint(fingerprint_path)
 
 ### Demo2.4 在线匹配算法
 
-这一部分仅作为参考，可以参考https://www.cnblogs.com/rubbninja/p/6186847.html，建议大家能够用更优的算法到这一部分。wifi模块在sklearn的基础上对一些常见的在线匹配算法进行了简单的封装，常见的算法与其模如下：
+这一部分仅作为参考，可以参考https://www.cnblogs.com/rubbninja/p/6186847.html，建议大家能够用更优的算法到这一部分。为了我自己操作方便，wifi模块在sklearn的基础上对一些常见的在线匹配算法进行了简单的封装，常见的算法与其模如下：
 
 | 方法         | 算法                             |
 | ------------ | -------------------------------- |
@@ -437,11 +437,17 @@ print('knn accuracy:', accuracy, 'm')
 
 经过上述操作可以得到预测坐标序列和误差均值。
 
+```powershell
+knn accuracy: 2.6384257280773786 m
+```
+
+其他算法类似。
+
 ### Demo2.5 show_trace函数：生成wifi指纹定位轨迹
 
 `show_trace`传入预测坐标序列和真实轨迹（可选）。
 
-示例1，对于指纹库data/fusion01/Rectangle：
+示例1，对于数据data/fusion01/Rectangle：
 
 ```python
 wifi.show_trace(predict, real_trace=real_trace)
@@ -455,17 +461,88 @@ wifi.show_trace(predict, real_trace=real_trace)
 
 ## Demo3 融合定位
 
-这一部分如果想了解更多，请参考我在csdn写的博客：https://blog.csdn.net/qq_28675933/article/details/103668811。
+要进行fusion操作，需要创建一个`fusion.Model`对象，配合`pdr`与`wifi`一起使用。
 
-### Demo3.1 安装Android Studio
+```python
+import location.fusion as fusion
+fusion = fusion.Model()
+```
 
-从安卓官网上下载安卓开发工具：https://developer.android.com/studio。
+目前fusion中只有ekf算法，为`ekf2d`函数，返回融合的状态列向量的数组，参数列表如下：
 
-### Demo3.2 新建项目并替换掉相关文件
+| 参数                     | 描述                       |
+| ------------------------ | -------------------------- |
+| transition_states        | 状态转移序列               |
+| observation_states       | 观测值序列                 |
+| transition_func          | 状态转移函数               |
+| jacobF_func              | 状态转移矩阵的一阶线性函数 |
+| initial_state_covariance | 初始状态协方差             |
+| observation_matrices     | 观测矩阵                   |
+| transition_covariance    | 状态转移协方差             |
+| observation_covariance   | 观测协方差                 |
 
-使用Android Studio新建一个空项目以后，用android中的文件替换掉空项目中的文件，替换的时候注意修改第一行的包名。
+示例1，对于数据data/fusion01/Rectangle：
 
-### Demo3.3 修改文件代码参数
+```python
+# 已知数据
+angle # 航向角序列
+L # 步长序列
+
+sigma_wifi = 2
+sigma_pdr = .5
+sigma_yaw = 15/360
+L # 步长序列
+
+# 状态转移函数（参入包含所有状态参数的数组）
+def state_conv(parameters_arr):
+    x = parameters_arr[0]
+    y = parameters_arr[1]
+    theta = parameters_arr[2]
+    return x+L*np.sin(theta), y+L[i]*np.cos(theta), angle[i] # 伪代码i表示第i个状态
+P = np.matrix([[1, 0, 0],
+               [0, 1, 0],
+               [0, 0, 1]])
+# 观测矩阵
+H = np.matrix([[1, 0, 0],
+               [0, 1, 0],
+               [0, 0, 0],
+               [0, 0, 1]])
+# 状态转移协方差矩阵
+Q = np.matrix([[sigma_pdr**2, 0, 0],
+               [0, sigma_pdr**2, 0],
+               [0, 0, sigma_yaw**2]])
+# 观测噪声方差
+R = np.matrix([[sigma_wifi**2, 0, 0, 0],
+               [0, sigma_wifi**2, 0, 0],
+               [0, 0, 0, 0],
+               [0, 0, 0, sigma_yaw**2]])
+def jacobF_func(i):
+    return np.matrix([[1, 0, L[i]*np.cos(angle[i])],
+                      [0, 1, -L[i]*np.sin(angle[i])],
+                      [0, 0, 1]])
+
+S = fusion.ekf2d(
+    transition_states = transition_states
+   ,observation_states = observation_states
+   ,transition_func = state_conv
+   ,jacobF_func = jacobF_func
+   ,initial_state_covariance = P
+   ,observation_matrices = H
+   ,transition_covariance = Q
+   ,observation_covariance = R
+)
+X_ekf = []
+Y_ekf = []
+for v in S:
+    X_ekf.append(v[0, 0])
+    Y_ekf.append(v[1, 0])
+```
+
+对所有轨迹数据进行可视化：
+
+![](https://github.com/salmoshu/location/raw/master/image/Demo2_3.png)
+
+
 
 
 

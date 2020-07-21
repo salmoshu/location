@@ -20,7 +20,7 @@ sigma_yaw = 15/360
 
 L = 0.8
 
-file_path = os.path.abspath(os.path.join(os.getcwd(), "./simulation/simulation_trace.npy"))
+file_path = os.path.abspath(os.path.join(os.getcwd(), "./simulation_trace.npy"))
 position = np.load(file_path)
 X_real = position[:,0]
 Y_real = position[:,1]
@@ -75,8 +75,6 @@ for k, v in enumerate(angle):
     ]))
 theta_counter = 0
 
-S = [] # 融合估计位置
-S.append(X)
 # 状态协方差矩阵（初始状态不是非常重要，经过迭代会逼近真实状态）
 P = np.matrix([[1, 0, 0],
                [0, 1, 0],
