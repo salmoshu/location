@@ -540,7 +540,7 @@ for v in S:
 
 对所有轨迹数据进行可视化：
 
-![](https://github.com/salmoshu/location/raw/master/image/Demo2_3.png)
+![](https://github.com/salmoshu/location/raw/master/image/Demo3_1.png)
 
 
 
