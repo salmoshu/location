@@ -9,7 +9,7 @@
 ------
 
 * [第三方依赖](#第三方依赖)
-* [工作目录](#工作目录)
+* [实验数据](#实验数据)
 * [开始使用](#开始使用)
     * [Demo1 PDR定位](#Demo1 PDR定位)
     * [Demo2 Wi-Fi指纹定位](#Demo2 Wi-Fi指纹定位)
@@ -29,30 +29,16 @@
 - Matplotlib
 - Sklearn
 
-# 工作目录
+# 实验数据
 
-| **data_collection**    | **数据采集程序**                                             |
-|:--|---|
-| activity_main.xml      | 替换位置：项目目录\程序名\app\src\main\res\layout            |
-| AndroidManifest.xml    | 替换位置：项目目录\程序名\app\src\main                       |
-| FileUtil.java          | 替换位置：项目目录\程序名\app\src\main\java\com\example\data |
-| LogUtil.java           | 替换位置：项目目录\程序名\app\src\main\java\com\example\data |
-| MainActivity.java      | 替换位置：项目目录\程序名\app\src\main\java\com\example\data |
-| WifiUtil.java          | 替换位置：项目目录\程序名\\app\src\main\java\com\example\data |
 | **data** | **实验数据** |
+|:--|---|
 | data/count_steps | 正常直线行走数据，包含了安卓或苹果设备采集的数据，用来判断步伐检测的结果是否良好，其中安卓程序为自己开发的程序，苹果数据采集程序为phyphox（使用的时候注意修改属性名，方便后续程序使用）。 |
 | data/fusion01          | 第一次融合定位实验，由于安卓Wi-Fi扫描频率较低，不能满足事实定位，因为在实际实验的时候每一个状态维持的时间大约在3s以上，具体数据包含了：Fingerprint（指纹数据）、Rectangle（矩阵路线行走数据）和SType（S型路线行走数据）。 |
 | data/fusion02          |                                                              |
 | data/linear_08m        | 正常直线行走数据，行走步数为10步，每一步为固定步长0.8m。     |
 | data/rssi_fluctuation  | 一组长时间记录Wi-Fi变化的数据，每个文件大约记录2万条样本数据，该数据可以用来分析Wi-Fi数据的波动情况。 |
 | data/still             | 静止数据，用来分析惯性传感器数据的特性。                     |
-| **location**           | **自定义定位工具包（可以进行数据分析与处理、定位解算与可视化，不同文件可配合使用）** |
-| location/analysis.py   | 分析Wi-Fi数据的特性，可以合并到wifi.py中。                   |
-| location/fusion.py     | 融合定位工具包，包含了EKF融合定位算法。                      |
-| locaiton/pdr.py        | PDR定位工具包，包含了步伐检测、航向角推算、步长推算和定位结束输出等常见功能。 |
-| location/wifi.py       | wifi指纹定位工具包，包含了常见的在线匹配算法。               |
-
-
 
 # 开始使用
 
@@ -72,6 +58,15 @@ linear = df[[col for col in df.columns if 'linear' in col]].values
 gravity = df[[col for col in df.columns if 'gravity' in col]].values
 rotation = df[[col for col in df.columns if 'rotation' in col]].values
 ```
+
+location模块提供以下功能：
+
+| **location**         | **自定义定位工具包（可以进行数据分析与处理、定位解算与可视化，不同文件可配合使用）** |
+| :------------------- | ------------------------------------------------------------ |
+| location/analysis.py | 分析Wi-Fi数据的特性，可以合并到wifi.py中。                   |
+| location/fusion.py   | 融合定位工具包，包含了EKF融合定位算法。                      |
+| locaiton/pdr.py      | PDR定位工具包，包含了步伐检测、航向角推算、步长推算和定位结束输出等常见功能。 |
+| location/wifi.py     | wifi指纹定位工具包，包含了常见的在线匹配算法。               |
 
 ## Demo1 PDR定位
 
@@ -399,6 +394,15 @@ pdr.show_trace(frequency=70, walkType='fusion', offset=np.pi/2, real_trace=real_
 ### Step 1.2 新建项目并替换掉相关文件
 
 使用Android Studio新建一个空项目以后，用data_collection中的文件替换掉空项目中的文件，替换的时候注意修改第一行的包名。
+
+| **data_collection** | **数据采集程序**                                             |
+| :------------------ | ------------------------------------------------------------ |
+| activity_main.xml   | 替换位置：项目目录\程序名\app\src\main\res\layout            |
+| AndroidManifest.xml | 替换位置：项目目录\程序名\app\src\main                       |
+| FileUtil.java       | 替换位置：项目目录\程序名\app\src\main\java\com\example\data |
+| LogUtil.java        | 替换位置：项目目录\程序名\app\src\main\java\com\example\data |
+| MainActivity.java   | 替换位置：项目目录\程序名\app\src\main\java\com\example\data |
+| WifiUtil.java       | 替换位置：项目目录\程序名\\app\src\main\java\com\example\data |
 
 ### Step 1.3 修改文件代码参数
 
