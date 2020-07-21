@@ -15,12 +15,6 @@
     * [Demo2 Wi-Fi指纹定位](#Demo2-Wi-Fi指纹定位)
     * [Demo3 融合定位](#Demo3-融合定位)
 * [数据采集程序](#数据采集程序)
-    * [第一步 开发安卓数据采集程序](#第一步-开发安卓数据采集程序)
-    * [第二步 Location库的基本介绍](#第二步-Location库的基本介绍)
-    * [Step 3 Create your algorithm](#step-3-create-your-algorithm)
-    * [Step 4 Run the simulation](#step-4-run-the-simulation)
-    * [Step 5 Show results](#step-5-show-results)
-* [Acknowledgement](#Acknowledgement)
 
 # 第三方依赖
 
