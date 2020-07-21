@@ -387,57 +387,71 @@ wifi.determineGaussian(rssi[:, 0], True, wipeRange=170*100)
 
 ### Demo2.3 create_fingerpirnt函数：构建一个指纹库
 
-`create_fingerpint`返回一个dataframe格式数据，传入的参数为所有采集好的指纹数据的文件目录，对文件命名的要求是：需要按照`x-y.csv`的方式对文件命名，比如坐标是`(0,0)`，则文件名为`0-0.csv`。
+`create_fingerpint`返回一个指纹数据均值与其对应的坐标，传入的参数为所有采集好的指纹数据的文件目录，对文件命名的要求是：需要按照`x-y.csv`的方式对文件命名，比如坐标是`(0,0)`，则文件名为`0-0.csv`。
 
 示例1，对于指纹库data/fusion01/Fingerpint：
 
 ```python
-fingerprint = wifi.create_fingerprint(fingerprint_path)
-print(fingerprint)
+rssi, position = wifi.create_fingerprint(fingerprint_path)
+```
+
+`rssi`和`position`可以直接带入sklearn的机器学习算法中进行训练。
+
+### Demo2.4 在线匹配算法
+
+这一部分仅作为参考，可以参考https://www.cnblogs.com/rubbninja/p/6186847.html，建议大家能够用更优的算法到这一部分。wifi模块在sklearn的基础上对一些常见的在线匹配算法进行了简单的封装，常见的算法与其模如下：
+
+| 方法         | 算法                             |
+| ------------ | -------------------------------- |
+| wifi.knn_reg | knn                              |
+| wifi.svm_reg | support vector machine           |
+| wifi.rf_reg  | random forest                    |
+| wifi.dbdt    | Gradient Boosting for regression |
+| wifi.nn      | Multi-layer Perceptron regressor |
+
+示例1，对于数据data/fusion01/Rectangle，如果使用knn：
+
+```python
+pdr = pdr.Model(linear, gravity, rotation)
+wifi = wifi.Model(rssi)
+
+# 真实轨迹
+real_trace = pd.read_csv(real_trace_file).values
+# 指纹数据（作为离线数据）
+fingerprint_rssi, fingerprint_position = wifi.create_fingerprint(fingerprint_path)
+
+# 找到峰值出的rssi值（作为在线匹配数据）
+steps = pdr.step_counter(frequency=70, walkType='fusion')
+print('steps:', len(steps))
+result = fingerprint_rssi[0].reshape(1, 4)
+for k, v in enumerate(steps):
+    index = v['index']
+    value = rssi[index]
+    value = value.reshape(1, len(value))
+    result = np.concatenate((result,value),axis=0)
+
+# knn算法
+predict, accuracy = wifi.knn_reg(fingerprint_rssi, fingerprint_position, result, real_trace)
+print('knn accuracy:', accuracy, 'm')
+```
+
+经过上述操作可以得到预测坐标序列和误差均值。
+
+### Demo2.5 show_trace函数：生成wifi指纹定位轨迹
+
+`show_trace`传入预测坐标序列和真实轨迹（可选）。
+
+示例1，对于指纹库data/fusion01/Rectangle：
+
+```python
+wifi.show_trace(predict, real_trace=real_trace)
 ```
 
 结果如下：
 
-```powershell
- rssi1      rssi2      rssi3      rssi4    x    y
-0  -55.878678 -56.860879 -56.260806 -58.937886  0.0  0.0
-1  -50.740929 -60.511611 -61.568578 -51.828737  0.0  1.0
-2  -51.475309 -58.534132 -59.358751 -59.386710  0.0  2.0
-3  -58.411872 -68.449381 -59.561908 -48.804443  0.0  3.0
-......
-```
+![](https://github.com/salmoshu/location/raw/master/image/Demo2_4.png)
 
-当数据比较大的时候，可以先将指纹库数据生成为一个单独csv文件，方便后续操作。
-
-```python
-fingerprint.to_csv(filename)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+由于wifi数据的波动非常大，因此结果会有些难看。
 
 ## Demo3 融合定位
 

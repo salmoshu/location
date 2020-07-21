@@ -6,15 +6,13 @@ import matplotlib.pyplot as plt
 import os
 
 path = os.path.abspath(os.path.join(os.getcwd(), "./data"))
-walking_data_file = path + '/fusion01/Rectangle/Rectangle-08.csv'
+
 real_trace_file = path + '/fusion01/Rectangle/RealTrace.csv'
-fingerprint_rssi_file = path + '/fusion01/Fingerprint/rssi_1m.csv'
-fingerprint_position_file = path + '/fusion01/Fingerprint/position_1m.csv'
+walking_data_file = path + '/fusion01/Rectangle/Rectangle-01.csv'
+fingerprint_path = path + '/fusion01/Fingerprint'
 
 df_walking = pd.read_csv(walking_data_file) # 实验数据
 real_trace = pd.read_csv(real_trace_file).values # 真实轨迹
-fingerprint_rssi = pd.read_csv(fingerprint_rssi_file).values # 指纹数据-信号强度
-fingerprint_position = pd.read_csv(fingerprint_position_file).values # 指纹数据-坐标点
 
 # 主要特征参数
 rssi = df_walking[[col for col in df_walking.columns if 'rssi' in col]].values
@@ -24,6 +22,9 @@ rotation = df_walking[[col for col in df_walking.columns if 'rotation' in col]].
 
 pdr = pdr.Model(linear, gravity, rotation)
 wifi = wifi.Model(rssi)
+
+# 指纹数据
+fingerprint_rssi, fingerprint_position = wifi.create_fingerprint(fingerprint_path)
 
 # 找到峰值出的rssi值
 steps = pdr.step_counter(frequency=70, walkType='fusion')
@@ -35,7 +36,7 @@ for k, v in enumerate(steps):
     value = value.reshape(1, len(value))
     result = np.concatenate((result,value),axis=0)
 
-# knn算法
+# # knn算法
 predict, accuracy = wifi.knn_reg(fingerprint_rssi, fingerprint_position, result, real_trace)
 print('knn accuracy:', accuracy, 'm')
 
@@ -63,4 +64,4 @@ print('knn accuracy:', accuracy, 'm')
 # predict, accuracy = wifi.nn(fingerprint_rssi, fingerprint_position, result, real_trace)
 # print('nn accuracy:', accuracy, 'm')
 
-wifi.show_trace(real_trace=real_trace, predict_trace=predict)
+wifi.show_trace(predict, real_trace=real_trace)
