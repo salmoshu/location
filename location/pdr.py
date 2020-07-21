@@ -16,6 +16,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
+plt.rcParams['font.sans-serif'] = ['SimHei']
+plt.rcParams['axes.unicode_minus'] = False
+
 class Model(object):
     def __init__(self, linear, gravity, rotation):
         self.linear = linear
