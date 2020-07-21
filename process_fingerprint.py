@@ -16,7 +16,7 @@ def process(file):
     global RSSI
     df = pd.read_csv(file)
     rssi = df[[col for col in df.columns if 'rssi' in col]].values
-    rssi = rssi[300:] # 视前300行为无效数据
+    rssi = rssi[300:] # 视前300行数据为无效数据
 
     values = []
     

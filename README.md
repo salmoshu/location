@@ -11,12 +11,12 @@
 * [第三方依赖](#第三方依赖)
 * [实验数据](#实验数据)
 * [开始使用](#开始使用)
-    * [Demo1 PDR定位](#Demo1 PDR定位)
-    * [Demo2 Wi-Fi指纹定位](#Demo2 Wi-Fi指纹定位)
-    * [Demo3 融合定位](#Demo3 融合定位)
+    * [Demo1 PDR定位](#Demo1-PDR定位)
+    * [Demo2 Wi-Fi指纹定位](#Demo2-Wi-Fi指纹定位)
+    * [Demo3 融合定位](#Demo3-融合定位)
 * [实验流程](#实验流程)
-    * [第一步 开发安卓数据采集程序](#第一步 开发安卓数据采集程序)
-    * [第二步 Location库的基本介绍](#第二步 Location库的基本介绍)
+    * [第一步 开发安卓数据采集程序](#第一步-开发安卓数据采集程序)
+    * [第二步 Location库的基本介绍](#第二步-Location库的基本介绍)
     * [Step 3 Create your algorithm](#step-3-create-your-algorithm)
     * [Step 4 Run the simulation](#step-4-run-the-simulation)
     * [Step 5 Show results](#step-5-show-results)
@@ -61,12 +61,11 @@ rotation = df[[col for col in df.columns if 'rotation' in col]].values
 
 location模块提供以下功能：
 
-| **location**         | **自定义定位工具包（可以进行数据分析与处理、定位解算与可视化，不同文件可配合使用）** |
-| :------------------- | ------------------------------------------------------------ |
-| location/analysis.py | 分析Wi-Fi数据的特性，可以合并到wifi.py中。                   |
-| location/fusion.py   | 融合定位工具包，包含了EKF融合定位算法。                      |
-| locaiton/pdr.py      | PDR定位工具包，包含了步伐检测、航向角推算、步长推算和定位结束输出等常见功能。 |
-| location/wifi.py     | wifi指纹定位工具包，包含了常见的在线匹配算法。               |
+| **location**       | **自定义定位工具包（可以进行数据分析与处理、定位解算与可视化，不同文件可配合使用）** |
+| :----------------- | ------------------------------------------------------------ |
+| location/fusion.py | 融合定位工具包，包含了EKF融合定位算法。                      |
+| locaiton/pdr.py    | PDR定位工具包，包含了步伐检测、航向角推算、步长推算和定位结束输出等常见功能。 |
+| location/wifi.py   | wifi指纹定位工具包，包含了常见的在线匹配算法。               |
 
 ## Demo1 PDR定位
 
@@ -302,7 +301,7 @@ position_x, position_y, strides, angle = pdr.show_steps(frequency=70, walkType='
 - **frequency** - 数据采集频率
 - **walkType** - 行走模式
 - **offset** - 初始航向角大小（可选）
-- **realTrace** - 真是轨迹坐标（可选）
+- **realTrace** - 两列的numpy.ndarray格式数据，表示真实轨迹坐标（可选）
 
 | walkType | 描述                                                         |
 | :------- | :----------------------------------------------------------- |
@@ -331,17 +330,112 @@ pdr.show_trace(frequency=70, walkType='fusion', offset=np.pi/2, real_trace=real_
 
 ## Demo2 Wi-Fi指纹定位
 
-这一部分如果想了解更多，请参考我在csdn写的博客：https://blog.csdn.net/qq_28675933/article/details/103668811。
+要进行wifi操作，需要创建一个`wifi.Model`对象，由于实验数据中是以每一步作为一个定位状态，因此这里`pdr`与`wifi`配合使用。从代码层面而言这不是必要的，也可以更换成其他业务。
 
-### Demo2.1 安装Android Studio
+```python
+import location.wifi as wifi
+wifi = wifi.Model(rssi)
+```
 
-从安卓官网上下载并安装安卓开发工具：https://developer.android.com/studio。
+### Demo2.1 rssi_fluctuation函数：查看wifi数据的波动情况
 
-### Demo2.2 新建项目并替换掉相关文件
+`rssi_fluctuation`需要传入一个布尔值merge作为参数。
 
-使用Android Studio新建一个空项目以后，用data_collection中的文件替换掉空项目中的文件，替换的时候注意修改第一行的包名。
+| merge | 描述                                                         |
+| :---- | :----------------------------------------------------------- |
+| True  | 以Wi-Fi扫描次数作为x轴                                       |
+| False | 以样本点数目作为x轴，事实上样本点数目合并一个Wi-Fi扫描间隔数据从而得到了合并的效果。 |
 
-### Demo2.3 修改文件代码参数
+示例1，显示data/rssi_fluctuation数据：
+
+```python
+wifi.rssi_fluctuation(False)
+```
+
+结果如下：
+
+![](https://github.com/salmoshu/location/raw/master/image/Demo2_1.png)
+
+示例2，显示data/rssi_fluctuation数据：
+
+```python
+wifi.rssi_fluctuation(True)
+```
+
+结果如下：
+
+![](https://github.com/salmoshu/location/raw/master/image/Demo2_2.png)
+
+### Demo2.2 determineGaussian函数：查看wifi数据的高斯拟合情况
+
+`determineGaussian`的参数如下所示：
+
+- **data**- numpy.ndarray格式数据，源自一个AP的wifi信号强度数据
+- **merge**- 是否合并为每一个扫描次数
+- **interval**- 划分间隔，默认值为1
+- **wipeRange**- 剔除样本点数目
+
+示例1，显示data/rssi_fluctuation数据：
+
+```python
+wifi.determineGaussian(rssi[:, 0], True, wipeRange=170*100)
+```
+
+结果如下：
+
+![](https://github.com/salmoshu/location/raw/master/image/Demo2_3.png)
+
+### Demo2.3 create_fingerpirnt函数：构建一个指纹库
+
+`create_fingerpint`返回一个dataframe格式数据，传入的参数为所有采集好的指纹数据的文件目录，对文件命名的要求是：需要按照`x-y.csv`的方式对文件命名，比如坐标是`(0,0)`，则文件名为`0-0.csv`。
+
+示例1，对于指纹库data/fusion01/Fingerpint：
+
+```python
+fingerprint = wifi.create_fingerprint(fingerprint_path)
+print(fingerprint)
+```
+
+结果如下：
+
+```powershell
+ rssi1      rssi2      rssi3      rssi4    x    y
+0  -55.878678 -56.860879 -56.260806 -58.937886  0.0  0.0
+1  -50.740929 -60.511611 -61.568578 -51.828737  0.0  1.0
+2  -51.475309 -58.534132 -59.358751 -59.386710  0.0  2.0
+3  -58.411872 -68.449381 -59.561908 -48.804443  0.0  3.0
+......
+```
+
+当数据比较大的时候，可以先将指纹库数据生成为一个单独csv文件，方便后续操作。
+
+```python
+fingerprint.to_csv(filename)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -355,7 +449,7 @@ pdr.show_trace(frequency=70, walkType='fusion', offset=np.pi/2, real_trace=real_
 
 ### Demo3.2 新建项目并替换掉相关文件
 
-使用Android Studio新建一个空项目以后，用data_collection中的文件替换掉空项目中的文件，替换的时候注意修改第一行的包名。
+使用Android Studio新建一个空项目以后，用android中的文件替换掉空项目中的文件，替换的时候注意修改第一行的包名。
 
 ### Demo3.3 修改文件代码参数
 
@@ -393,9 +487,9 @@ pdr.show_trace(frequency=70, walkType='fusion', offset=np.pi/2, real_trace=real_
 
 ### Step 1.2 新建项目并替换掉相关文件
 
-使用Android Studio新建一个空项目以后，用data_collection中的文件替换掉空项目中的文件，替换的时候注意修改第一行的包名。
+使用Android Studio新建一个空项目以后，用android中的文件替换掉空项目中的文件，替换的时候注意修改第一行的包名。
 
-| **data_collection** | **数据采集程序**                                             |
+| **android**         | **数据采集程序**                                             |
 | :------------------ | ------------------------------------------------------------ |
 | activity_main.xml   | 替换位置：项目目录\程序名\app\src\main\res\layout            |
 | AndroidManifest.xml | 替换位置：项目目录\程序名\app\src\main                       |
