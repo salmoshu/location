@@ -25,7 +25,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     // 配置路由器参数
-    private int[] levelArray = new int[8];
+    private int rssiLength = 8;
     private String[] apNames = new String[]{"AP-01","AP-02","AP-03","AP-04","AP-05", "AP-06", "AP-07", "AP-08"};
     private String rssis = "rssi1,rssi2,rssi3,rssi4,rssi5,rssi6,rssi7,rssi8";
 
@@ -36,8 +36,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             "gravity-x,gravity-y,gravity-z," +
             "rotation-x,rotation-y,rotation-z,rotation-w\n");
     private WifiBroadcastReceiver wifiReceiver;
+    private int[] levelArray = new int[rssiLength];
     private List<ScanResult> wifiResultList = new ArrayList<>();
-    private StringBuilder dataStringBuilder = templateString;
+    private StringBuilder dataStringBuilder = new StringBuilder(templateString.toString());
+
 
     private SensorManager sensorManager;
     private Sensor linear;
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Runnable runnable;
 
     private int counter = 0; // 记录秒数
+    private boolean isStart = false; // 记录是否开始记录数据
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +75,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     /** Called when the user touches the "开始" button */
     public void collectRSSI(View view) {
+        if(isStart) {
+           return;
+        }
+        isStart = true;
         final Context context = this;
         final TextView textView = (TextView)findViewById(R.id.status_label);
         // 读取wifi数据并保存
@@ -132,6 +139,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     /** Called when the user touches the "结束" button */
     public void saveFile(View view) throws IOException {
+        if(!isStart) {
+            return;
+        }
+        isStart = false;
         // 将数据保存到本地文件
         Date date = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
@@ -143,8 +154,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         FileUtil.writeFile(fileName, dataStringBuilder.toString(), this);
 //        LogUtil.i("FILE", FileUtil.readFile(fileName, this));
 
-        dataStringBuilder = templateString;
-        levelArray = new int[4];
+        dataStringBuilder =  new StringBuilder(templateString.toString());
+        levelArray = new int[rssiLength];
         counter = 0;
     }
 
