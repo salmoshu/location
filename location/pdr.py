@@ -82,7 +82,7 @@ class Model(object):
         min_acceleration = 0.2 * g # 0.2g
         max_acceleration = 2 * g   # 2g
         # 峰值间隔(s)
-        min_interval = 0.4 if walkType=='normal' else 2
+        min_interval = 0.4 if walkType=='normal' else 3 # 'fusion
         # max_interval = 1
         # 计算步数
         steps = []
@@ -101,19 +101,21 @@ class Model(object):
         # 条件2：两个峰值之前间隔至少大于0.4s*offset
         # del使用的时候，一般采用先记录再删除的原则
         if len(steps)>0:
-            temp = steps[0]
+            lastStep = steps[0]
             dirty_points = []
             for key, step_dict in enumerate(steps):
-                if step_dict['index'] == steps[0]['index']:
+                # print(step_dict['index'])
+                if key == 0:
                     continue
-                if step_dict['index']-temp['index'] < min_interval*frequency:
-                    if step_dict['acceleration'] <= temp['acceleration']:
+                if step_dict['index']-lastStep['index'] < min_interval*frequency:
+                    # print('last:', lastStep['index'], 'this:', step_dict['index'])
+                    if step_dict['acceleration'] <= lastStep['acceleration']:
                         dirty_points.append(key)
                     else:
-                        temp = step_dict
+                        lastStep = step_dict
                         dirty_points.append(key-1)
                 else:
-                    temp = step_dict
+                    lastStep = step_dict
             
             counter = 0 # 记录删除数量，作为偏差值
             for key in dirty_points:
@@ -133,22 +135,20 @@ class Model(object):
         _, _, yaw = self.quaternion2euler()
         init_theta = yaw[0] # 初始角度
         for i,v in enumerate(yaw):
-            yaw[i] = v-init_theta
+            yaw[i] = -(v-init_theta) # 由于yaw逆时针为正向，转化为顺时针为正向更符合大家的思维方式
         return yaw
     
     '''
         步行轨迹的每一个相对坐标位置
         返回的是预测作为坐标
     '''
-    def pdr_position(self, frequency=100, walkType='normal', offset=0):
-        init_step = (0, 0)
+    def pdr_position(self, frequency=100, walkType='normal', offset=0, initPosition=(0, 0)):
         yaw = self.step_heading()
-
         steps = self.step_counter(frequency=frequency, walkType=walkType)
         position_x = []
         position_y = []
-        x = init_step[0]
-        y = init_step[1]
+        x = initPosition[0]
+        y = initPosition[1]
         position_x.append(x)
         position_y.append(y)
         strides = []
@@ -315,7 +315,7 @@ class Model(object):
     '''
         显示PDR运动轨迹图
     '''
-    def show_trace(self, frequency=100, walkType='normal', **kw):
+    def show_trace(self, frequency=100, walkType='normal', initPosition=(0, 0), **kw):
         plt.grid()
         handles = []
         labels = []
@@ -336,7 +336,7 @@ class Model(object):
         else:
             offset = 0
         
-        x, y, _, _ = self.pdr_position(frequency=frequency, walkType=walkType, offset=offset)
+        x, y, _, _ = self.pdr_position(frequency=frequency, walkType=walkType, offset=offset, initPosition=initPosition)
         print('steps:', len(x)-1)
 
         for k in range(0, len(x)):

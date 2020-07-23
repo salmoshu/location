@@ -29,7 +29,7 @@
 |:--|---|
 | data/count_steps | 正常直线行走数据，包含了安卓或苹果设备采集的数据，用来判断步伐检测的结果是否良好，其中安卓程序为自己开发的程序，苹果数据采集程序为phyphox（使用的时候注意修改属性名，方便后续程序使用）。 |
 | data/fusion01          | 第一次融合定位实验，由于安卓Wi-Fi扫描频率较低，不能满足事实定位，因为在实际实验的时候每一个状态维持的时间大约在3s以上，具体数据包含了：Fingerprint（指纹数据）、Rectangle（矩阵路线行走数据）和SType（S型路线行走数据）。 |
-| data/fusion02          |                                                              |
+| data/fusion02          | 第二次融合定位实验，具体数据包含了：Fingerprint（指纹数据）、LeftBorder（左边缘测试点）、RightBorder（右边缘测试点）和LType（L型路线行走数据）。 |
 | data/linear_08m        | 正常直线行走数据，行走步数为10步，每一步为固定步长0.8m。     |
 | data/rssi_fluctuation  | 一组长时间记录Wi-Fi变化的数据，每个文件大约记录2万条样本数据，该数据可以用来分析Wi-Fi数据的波动情况。 |
 | data/still             | 静止数据，用来分析惯性传感器数据的特性。                     |
@@ -276,6 +276,7 @@ yaw = pdr.step_heading()
 - **frequency** - 数据采集频率
 - **walkType** - 行走模式
 - **offset** - 初始航向角大小
+- **initPosition** - 初始位置，格式为两个元素的元组形式，分别表示x与y
 
 | walkType | 描述                                                         |
 | :------- | :----------------------------------------------------------- |
@@ -285,7 +286,7 @@ yaw = pdr.step_heading()
 示例：
 
 ```python
-position_x, position_y, strides, angle = pdr.show_steps(frequency=70, walkType='fusion'， offset=np.pi/2)
+position_x, position_y, strides, angle = pdr.show_steps(frequency=70, walkType='fusion'， offset=np.pi/2, initPosition=(0,0))
 ```
 
 ### Demo1.8 show_trace函数：获取数据中的步伐信息
@@ -294,7 +295,8 @@ position_x, position_y, strides, angle = pdr.show_steps(frequency=70, walkType='
 
 - **frequency** - 数据采集频率
 - **walkType** - 行走模式
-- **offset** - 初始航向角大小（可选）
+- **offset** - 初始航向角大小
+- **initPosition** - 初始位置，格式为两个元素的元组形式，分别表示x与y
 - **realTrace** - 两列的numpy.ndarray格式数据，表示真实轨迹坐标（可选）
 
 | walkType | 描述                                                         |
@@ -305,7 +307,7 @@ position_x, position_y, strides, angle = pdr.show_steps(frequency=70, walkType='
 示例1，显示data/SType数据的预测轨迹图：
 
 ```python
-pdr.show_trace(frequency=70, walkType='fusion')
+pdr.show_trace(frequency=70, walkType='fusion', initPosition=(0,0))
 ```
 
 结果如下：

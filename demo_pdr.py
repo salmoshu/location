@@ -66,4 +66,4 @@ pdr = pdr.Model(linear, gravity, rotation)
 # Demo6：显示PDR预测轨迹
 # 注意：PDR不清楚初始位置与初始航向角
 # pdr.show_trace(frequency=70, walkType='normal')
-pdr.show_trace(frequency=70, walkType='fusion', offset=np.pi/2, real_trace=real_trace)
+pdr.show_trace(frequency=70, walkType='fusion', offset=np.pi/2, initPosition=(0,0), real_trace=real_trace)
