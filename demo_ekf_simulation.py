@@ -14,8 +14,8 @@ EKF仿真实验
 
 fusion = fusion.Model()
 
-sigma_wifi = 2
-sigma_pdr = .5
+sigma_wifi = 3
+sigma_pdr = .1
 sigma_yaw = 15/360
 
 L = 0.8

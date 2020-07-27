@@ -12,19 +12,18 @@ import location.fusion as fusion
 注意假如有n个状态，那么就有n-1次状态转换
 '''
 
-sigma_wifi = 2
-sigma_pdr = .5
+frequency = 50 # 数据采集频率
+sigma_wifi = 3
+sigma_pdr = .1
 sigma_yaw = 15/360
-angle_offset = 0
 # 初始状态
-X = np.matrix('0; 0; 0')
+X = np.matrix('2; 1; 0')
 # X = np.matrix('2; 2; 0') # 对初始状态进行验证
 
 path = os.path.abspath(os.path.join(os.getcwd(), "./data"))
-
-real_trace_file = path + '/fusion01/Rectangle/RealTrace.csv'
-walking_data_file = path + '/fusion01/Rectangle/Rectangle-01.csv'
-fingerprint_path = path + '/fusion01/Fingerprint'
+real_trace_file = path + '/fusion02/LType/RealTrace.csv'
+walking_data_file = path + '/fusion02/LType/LType-03.csv'
+fingerprint_path = path + '/fusion02/Fingerprint'
 
 df_walking = pd.read_csv(walking_data_file) # 实验数据
 real_trace = pd.read_csv(real_trace_file).values # 真实轨迹
@@ -43,9 +42,9 @@ fusion = fusion.Model()
 fingerprint_rssi, fingerprint_position = wifi.create_fingerprint(fingerprint_path)
 
 # 找到峰值出的rssi值
-steps = pdr.step_counter(frequency=70, walkType='fusion')
+steps = pdr.step_counter(frequency=frequency, walkType='fusion')
 print('steps:', len(steps))
-result = fingerprint_rssi[0].reshape(1, 4)
+result = fingerprint_rssi[0].reshape(1, rssi.shape[1])
 for k, v in enumerate(steps):
     index = v['index']
     value = rssi[index]
@@ -57,15 +56,19 @@ predict, accuracy = wifi.knn_reg(fingerprint_rssi, fingerprint_position, result,
 print('knn accuracy:', accuracy, 'm')
 predict = np.array(predict)
 
-x_pdr, y_pdr, strides, angle = pdr.pdr_position(frequency=70, walkType='fusion', offset=angle_offset)
-x_pdr_init = X[0, 0]
-y_pdr_init = X[1, 0]
-x_pdr_offset = x_pdr_init - x_pdr[0]
-y_pdr_offset = y_pdr_init - y_pdr[0]
-strides[0] = X[2, 0]
-for k in range(len(x_pdr)):
-    x_pdr[k] = x_pdr[k] + x_pdr_offset
-    y_pdr[k] = y_pdr[k] + y_pdr_offset
+init_x = X[0, 0]
+init_y = X[1, 0]
+init_angle = X[2, 0]
+x_pdr, y_pdr, strides, angle = pdr.pdr_position(frequency=frequency, walkType='fusion', offset=init_angle, initPosition=(init_x, init_y))
+
+# ekf
+X_real = real_trace[:,0]
+Y_real = real_trace[:,1]
+X_wifi = predict[:,0]
+Y_wifi = predict[:,1]
+X_pdr = x_pdr
+Y_pdr = y_pdr
+L = strides + [0] # 步长计入一个状态中，最后一个位置没有下一步，因此步长记为0
 
 theta_counter = 0
 def state_conv(parameters_arr):
@@ -76,14 +79,6 @@ def state_conv(parameters_arr):
     theta = parameters_arr[2]
     return x+L[theta_counter]*np.sin(theta), y+L[theta_counter]*np.cos(theta), angle[theta_counter]
 
-X_real = real_trace[:,0]
-Y_real = real_trace[:,1]
-X_wifi = predict[:,0]
-Y_wifi = predict[:,1]
-X_pdr = x_pdr
-Y_pdr = y_pdr
-L = strides + [0]
-
 # 目前不考虑起始点（设定为0，0），因此wifi数组长度比实际位置长度少1
 observation_states = []
 for i in range(len(angle)):
@@ -93,14 +88,28 @@ for i in range(len(angle)):
         [x], [y], [L[i]], [angle[i]]
     ]))
 
+# transition_states = [X]
+# for k, v in enumerate(angle):
+#     if k==0: V = X
+#     if k==len(angle)-1: break
+#     x = X_pdr[k]
+#     y = Y_pdr[k]
+#     theta = angle[k+1]
+#     V = np.matrix([[x],[y],[theta]])
+#     transition_states.append(np.matrix([
+#         [x],[y],[theta]
+#     ]))
+
+X_pdr = [X[0, 0]]
+Y_pdr = [X[1, 0]]
 transition_states = [X]
 for k, v in enumerate(angle):
     if k==0: V = X
     if k==len(angle)-1: break
-    x = X_pdr[k]
-    y = Y_pdr[k]
-    theta = angle[k+1]
+    x, y, theta = state_conv([V[0, 0], V[1, 0], V[2, 0]])
     V = np.matrix([[x],[y],[theta]])
+    X_pdr.append(x)
+    Y_pdr.append(y)
     transition_states.append(np.matrix([
         [x],[y],[theta]
     ]))
