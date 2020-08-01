@@ -58,7 +58,8 @@ class Model(object):
 
     # 标准差
     def square_accuracy(self, predictions, labels):
-        return np.sqrt(np.mean(np.sum((predictions - labels)**2, 1)))
+        accuracy = np.sqrt(np.mean(np.sum((predictions - labels)**2, 1)))
+        return round(accuracy, 3)
 
     def ml_limited_reg(self, type, offline_rss, offline_location, online_rss, online_location):
         if type == 'knn':

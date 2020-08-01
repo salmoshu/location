@@ -163,7 +163,8 @@ class Model(object):
             y = y + length*np.cos(theta)
             position_x.append(x)
             position_y.append(y)
-        return position_x, position_y, strides, angle
+        # 步长计入一个状态中，最后一个位置没有下一步，因此步长记为0
+        return position_x, position_y, strides + [0], angle
 
     '''
     显示步伐检测图像
