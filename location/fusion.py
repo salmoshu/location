@@ -14,6 +14,11 @@ class Model(object):
     def __init__(self):
         pass
 
+    # 标准差
+    def square_accuracy(self, predictions, labels):
+        accuracy = np.sqrt(np.mean(np.sum((predictions - labels)**2, 1)))
+        return round(accuracy, 3)
+
     def ekf2d(
         self
        ,transition_states

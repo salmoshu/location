@@ -22,7 +22,7 @@ X = np.matrix('2; 1; 0')
 
 path = os.path.abspath(os.path.join(os.getcwd(), "./data"))
 real_trace_file = path + '/fusion02/LType/RealTrace.csv'
-walking_data_file = path + '/fusion02/LType/LType-03.csv'
+walking_data_file = path + '/fusion02/LType/LType-05.csv'
 fingerprint_path = path + '/fusion02/Fingerprint'
 
 df_walking = pd.read_csv(walking_data_file) # 实验数据
@@ -68,9 +68,9 @@ X_wifi = predict[:,0]
 Y_wifi = predict[:,1]
 X_pdr = x_pdr
 Y_pdr = y_pdr
-L = strides + [0] # 步长计入一个状态中，最后一个位置没有下一步，因此步长记为0
+L = strides
 
-theta_counter = 0
+theta_counter = -1
 def state_conv(parameters_arr):
     global theta_counter
     theta_counter = theta_counter+1
@@ -88,32 +88,13 @@ for i in range(len(angle)):
         [x], [y], [L[i]], [angle[i]]
     ]))
 
-# transition_states = [X]
-# for k, v in enumerate(angle):
-#     if k==0: V = X
-#     if k==len(angle)-1: break
-#     x = X_pdr[k]
-#     y = Y_pdr[k]
-#     theta = angle[k+1]
-#     V = np.matrix([[x],[y],[theta]])
-#     transition_states.append(np.matrix([
-#         [x],[y],[theta]
-#     ]))
-
-X_pdr = [X[0, 0]]
-Y_pdr = [X[1, 0]]
-transition_states = [X]
+transition_states = []
 for k, v in enumerate(angle):
-    if k==0: V = X
-    if k==len(angle)-1: break
-    x, y, theta = state_conv([V[0, 0], V[1, 0], V[2, 0]])
+    x = X_pdr[k]
+    y = Y_pdr[k]
+    theta = angle[k]
     V = np.matrix([[x],[y],[theta]])
-    X_pdr.append(x)
-    Y_pdr.append(y)
-    transition_states.append(np.matrix([
-        [x],[y],[theta]
-    ]))
-theta_counter = 0
+    transition_states.append(V)
 
 # 状态协方差矩阵（初始状态不是非常重要，经过迭代会逼近真实状态）
 P = np.matrix([[1, 0, 0],
@@ -156,6 +137,11 @@ Y_ekf = []
 for v in S:
     X_ekf.append(v[0, 0])
     Y_ekf.append(v[1, 0])
+
+ekf_predict = np.concatenate((np.array(X_ekf).reshape(len(X_ekf), 1),
+                              np.array(Y_ekf).reshape(len(Y_ekf), 1)), axis=1)
+accuracy = fusion.square_accuracy(ekf_predict, real_trace)
+print('ekf accuracy:', accuracy, 'm')
 
 x = X_ekf
 y = Y_ekf
