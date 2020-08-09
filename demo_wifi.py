@@ -7,9 +7,9 @@ import os
 
 path = os.path.abspath(os.path.join(os.getcwd(), "./data"))
 
-real_trace_file = path + '/fusion01/Rectangle/RealTrace.csv'
-walking_data_file = path + '/fusion01/Rectangle/Rectangle-01.csv'
-fingerprint_path = path + '/fusion01/Fingerprint'
+real_trace_file = path + '/fusion02/LType/RealTrace.csv'
+walking_data_file = path + '/fusion02/LType/LType-02.csv'
+fingerprint_path = path + '/fusion02/Fingerprint'
 
 df_walking = pd.read_csv(walking_data_file) # 实验数据
 real_trace = pd.read_csv(real_trace_file).values # 真实轨迹
@@ -29,7 +29,7 @@ fingerprint_rssi, fingerprint_position = wifi.create_fingerprint(fingerprint_pat
 # 找到峰值出的rssi值
 steps = pdr.step_counter(frequency=70, walkType='fusion')
 print('steps:', len(steps))
-result = fingerprint_rssi[0].reshape(1, 4)
+result = fingerprint_rssi[0].reshape(1, rssi.shape[1])
 for k, v in enumerate(steps):
     index = v['index']
     value = rssi[index]

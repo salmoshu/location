@@ -159,9 +159,9 @@ class Model(object):
         valueRange = length * [0]
 
         textstr = '\n'.join((
-                r'$max=%.8f$' % (maxValue, ),
-                r'$min=%.8f$' % (minValue, ),
-                r'$mean=%.8f$' % (meanValue, )))
+                r'$max=%.2f$' % (maxValue, ),
+                r'$min=%.2f$' % (minValue, ),
+                r'$mean=%.2f$' % (meanValue, )))
 
         if merge==True:
             # 区间分段样本点
@@ -186,11 +186,12 @@ class Model(object):
         if merge==True:
             print('Wi-Fi Scan Times:', len(data))
 
+        probability = np.array(counterArr) / np.sum(counterArr)
         normal_mean = np.mean(data)
         normal_sigma = np.std(data)
         normal_x = np.linspace(minValue, maxValue, 100)
         normal_y = norm.pdf(normal_x, normal_mean, normal_sigma)
-        normal_y = normal_y * np.max(counterArr) / np.max(normal_y)
+        normal_y = normal_y * np.max(probability) / np.max(normal_y)
 
         _, ax = plt.subplots()
 
@@ -198,10 +199,10 @@ class Model(object):
         for axis in [ax.xaxis, ax.yaxis]:
             axis.set_major_locator(ticker.MaxNLocator(integer=True))
 
-        ax.bar(valueRange, counterArr, label='distribution')
+        ax.bar(valueRange, probability, label='distribution')
         ax.plot(normal_x, normal_y, 'r-', label='fitting')
-        plt.xlabel('value')
-        plt.ylabel('count')
+        plt.xlabel('rssi value')
+        plt.ylabel('probability')
         plt.title('信号强度数据的高斯拟合')
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14,

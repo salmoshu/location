@@ -10,5 +10,5 @@ df = pd.read_csv(data_file)
 rssi = df[[col for col in df.columns if 'rssi' in col]].values
 
 wifi = wifi.Model(rssi)
-wifi.rssi_fluctuation(False)
-# wifi.determineGaussian(rssi[:, 0], True, wipeRange=170*100)
+# wifi.rssi_fluctuation(False)
+wifi.determineGaussian(rssi[:, 0], True, wipeRange=170*100)

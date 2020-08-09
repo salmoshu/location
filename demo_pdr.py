@@ -7,8 +7,8 @@ import os
 path = os.path.abspath(os.path.join(os.getcwd(), "./data"))
 # walking_data_file = path + '/linear_8m/linear01.csv'
 # walking_data_file = path + '/still/still02.csv'
-walking_data_file = path + '/fusion01/SType/SType-01.csv'
-real_trace_file = path + '/fusion01/SType/RealTrace.csv'
+walking_data_file = path + '/fusion02/LType/LType-01.csv'
+real_trace_file = path + '/fusion02/LType/RealTrace.csv'
 real_trace = pd.read_csv(real_trace_file).values # 真实轨迹
 
 df_walking = pd.read_csv(walking_data_file)
@@ -66,4 +66,4 @@ pdr = pdr.Model(linear, gravity, rotation)
 # Demo6：显示PDR预测轨迹
 # 注意：PDR不清楚初始位置与初始航向角
 # pdr.show_trace(frequency=70, walkType='normal')
-pdr.show_trace(frequency=70, walkType='fusion', offset=np.pi/2, initPosition=(0,0), real_trace=real_trace)
+pdr.show_trace(frequency=70, walkType='fusion', offset=0, initPosition=(2,1), real_trace=real_trace)

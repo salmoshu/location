@@ -22,7 +22,7 @@ X = np.matrix('2; 1; 0')
 
 path = os.path.abspath(os.path.join(os.getcwd(), "./data"))
 real_trace_file = path + '/fusion02/LType/RealTrace.csv'
-walking_data_file = path + '/fusion02/LType/LType-05.csv'
+walking_data_file = path + '/fusion02/LType/LType-06.csv'
 fingerprint_path = path + '/fusion02/Fingerprint'
 
 df_walking = pd.read_csv(walking_data_file) # 实验数据
