@@ -7,9 +7,9 @@ import os
 
 path = os.path.abspath(os.path.join(os.getcwd(), "./data"))
 
-real_trace_file = path + '/fusion02/LType/RealTrace.csv'
-walking_data_file = path + '/fusion02/LType/LType-02.csv'
-fingerprint_path = path + '/fusion02/Fingerprint'
+real_trace_file = path + '/fusion/LType/RealTrace.csv'
+walking_data_file = path + '/fusion/LType/LType-02.csv'
+fingerprint_path = path + '/fusion/Fingerprint'
 
 df_walking = pd.read_csv(walking_data_file) # 实验数据
 real_trace = pd.read_csv(real_trace_file).values # 真实轨迹

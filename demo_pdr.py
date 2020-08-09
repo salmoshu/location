@@ -7,8 +7,8 @@ import os
 path = os.path.abspath(os.path.join(os.getcwd(), "./data"))
 # walking_data_file = path + '/linear_8m/linear01.csv'
 # walking_data_file = path + '/still/still02.csv'
-walking_data_file = path + '/fusion02/LType/LType-01.csv'
-real_trace_file = path + '/fusion02/LType/RealTrace.csv'
+walking_data_file = path + '/fusion/LType/LType-01.csv'
+real_trace_file = path + '/fusion/LType/RealTrace.csv'
 real_trace = pd.read_csv(real_trace_file).values # 真实轨迹
 
 df_walking = pd.read_csv(walking_data_file)
