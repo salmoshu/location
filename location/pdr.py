@@ -215,9 +215,9 @@ class Model(object):
                     counter[k] = counter[k]+1
         
         textstr = '\n'.join((
-            r'$max=%.8f$' % (acc_max, ),
-            r'$min=%.8f$' % (acc_min, ),
-            r'$mean=%.8f$' % (np.mean(data), )))
+            r'$max=%.3f$' % (acc_max, ),
+            r'$min=%.3f$' % (acc_min, ),
+            r'$mean=%.3f$' % (np.mean(data), )))
         _, ax = plt.subplots()
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14,

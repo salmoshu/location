@@ -28,8 +28,8 @@
 | **data** | **实验数据** |
 |:--|---|
 | data/count_steps | 正常直线行走数据，包含了安卓或苹果设备采集的数据，用来判断步伐检测的结果是否良好，其中安卓程序为自己开发的程序，苹果数据采集程序为phyphox（使用的时候注意修改属性名，方便后续程序使用）。 |
-| data/fusion01          | 第一次融合定位实验，由于安卓Wi-Fi扫描频率较低，不能满足事实定位，因为在实际实验的时候每一个状态维持的时间大约在3s以上，具体数据包含了：Fingerprint（指纹数据）、Rectangle（矩阵路线行走数据）和SType（S型路线行走数据）。 |
-| data/fusion02          | 第二次融合定位实验，具体数据包含了：Fingerprint（指纹数据）、LeftBorder（左边缘测试点）、RightBorder（右边缘测试点）和LType（L型路线行走数据）。 |
+| data/pdr       | 非正常行走数据（每一步停留了3s以上），Rectangle（矩阵路线行走数据）和SType（S型路线行走数据）。 |
+| data/fusion          | 融合定位实验，具体数据包含了：Fingerprint（指纹数据）、LeftBorder（左边缘测试点）、RightBorder（右边缘测试点）和LType（L型路线行走数据）。 |
 | data/linear_08m        | 正常直线行走数据，行走步数为10步，每一步为固定步长0.8m。     |
 | data/rssi_fluctuation  | 一组长时间记录Wi-Fi变化的数据，每个文件大约记录2万条样本数据，该数据可以用来分析Wi-Fi数据的波动情况。 |
 | data/still             | 静止数据，用来分析惯性传感器数据的特性。                     |
@@ -263,7 +263,7 @@ sum: 0.341719
 
 ### Demo1.6 step_heading函数：步长推算函数
 
-实验过程中手机采用HOLDING模式，即手握手机放在胸前，并且x轴与地面平行，`step_heading`直接返回每一时刻的偏航角yaw值，初始值设为0。
+实验过程中手机采用HOLDING模式，即手握手机放在胸前，并且x轴与地面平行，`step_heading`直接返回每一时刻的偏航角yaw值，初始值默认设为0，这里的都是相对值。
 
 ```python
 yaw = pdr.step_heading()
@@ -485,8 +485,8 @@ angle # 航向角序列
 L # 步长序列
 
 sigma_wifi = 2
-sigma_pdr = .5
-sigma_yaw = 15/360
+sigma_pdr = .2
+sigma_yaw = 10/360
 L # 步长序列
 
 # 状态转移函数（参入包含所有状态参数的数组）
