@@ -395,7 +395,7 @@ rssi, position = wifi.create_fingerprint(fingerprint_path)
 
 ### Demo2.4 在线匹配算法
 
-这一部分仅作为参考，可以参考https://www.cnblogs.com/rubbninja/p/6186847.html，建议大家能够用更优的算法到这一部分。为了我自己操作方便，wifi模块在sklearn的基础上对一些常见的在线匹配算法进行了简单的封装，常见的算法与其模如下：
+这一部分仅作为参考，可以参考https://www.cnblogs.com/rubbninja/p/6186847.html ，建议大家能够用更优的算法到这一部分。为了我自己操作方便，wifi模块在sklearn的基础上对一些常见的在线匹配算法进行了简单的封装，常见的算法与其模如下：
 
 | 方法         | 算法                             |
 | ------------ | -------------------------------- |
@@ -405,7 +405,7 @@ rssi, position = wifi.create_fingerprint(fingerprint_path)
 | wifi.dbdt    | Gradient Boosting for regression |
 | wifi.nn      | Multi-layer Perceptron regressor |
 
-示例1，对于数据data/fusion01/Rectangle，如果使用knn：
+示例1，对于数据data/fusion/LType，如果使用knn：
 
 ```python
 pdr = pdr.Model(linear, gravity, rotation)
@@ -434,7 +434,7 @@ print('knn accuracy:', accuracy, 'm')
 经过上述操作可以得到预测坐标序列和误差均值。
 
 ```powershell
-knn accuracy: 2.6384257280773786 m
+knn accuracy: 1.93 m
 ```
 
 其他算法类似。
@@ -443,7 +443,7 @@ knn accuracy: 2.6384257280773786 m
 
 `show_trace`传入预测坐标序列和真实轨迹（可选）。
 
-示例1，对于数据data/fusion01/Rectangle：
+示例1，对于数据data/fusion/LType：
 
 ```python
 wifi.show_trace(predict, real_trace=real_trace)
@@ -477,7 +477,7 @@ fusion = fusion.Model()
 | transition_covariance    | 状态转移协方差             |
 | observation_covariance   | 观测协方差                 |
 
-示例1，对于数据data/fusion01/Rectangle：
+示例1，对于数据data/fusion/LType：
 
 ```python
 # 已知数据
