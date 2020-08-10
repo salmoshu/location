@@ -542,7 +542,7 @@ for v in S:
 
 # 数据采集程序
 
-开发安卓数据采集程序这一部分如果想了解更多，请参考我在csdn写的博客：https://blog.csdn.net/qq_28675933/article/details/103668811。
+开发安卓数据采集程序这一部分如果想了解更多，请参考我在csdn写的博客：https://blog.csdn.net/qq_28675933/article/details/103668811 。
 
 ### Step 1 安装Android Studio
 
