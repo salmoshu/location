@@ -287,7 +287,7 @@ yaw = pdr.step_heading()
 position_x, position_y, strides, angle = pdr.show_steps(frequency=70, walkType='fusion'， offset=np.pi/2, initPosition=(0,0))
 ```
 
-### Demo1.8 show_trace函数：获取数据中的步伐信息
+### Demo1.8 show_trace函数：输出行走轨迹图
 
 `show_trace`内部使用了`pdr_position`，可以输出轨迹图像。
 
