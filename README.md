@@ -13,6 +13,7 @@
     * [Demo2 Wi-Fi指纹定位](#Demo2-Wi-Fi指纹定位)
     * [Demo3 融合定位](#Demo3-融合定位)
 * [数据采集程序](#数据采集程序)
+* [科研创新](#科研创新)
 
 # 第三方依赖
 
@@ -604,3 +605,27 @@ PS C:\Users\salmo\Desktop>
 | ------------- | ----------- | ----------- | ----------- | ----------- | ------------- | ------------- | ------------- | -------------- | -------------- | -------------- | ---------- | ---------- | ---------- | ---------- |
 | 1591610015190 | -37         | -45         | -66         | -64         | 0.1322        | -0.0105       | 0.5227        | 0.4463         | 2.8838         | 9.3623         | 0.078042   | -0.12869   | -0.75696   | 0.635895   |
 | ...           | ...         | ...         | ...         | ...         | ...           | ...           | ...           | ...            | ...            | ...            | ...        | ...        | ...        | ...        |
+
+
+
+# 科研创新
+
+本部分将在大论文完成以后更新。
+
+![](https://github.com/salmoshu/location/raw/master/image/paper/1.png)
+
+![](https://github.com/salmoshu/location/raw/master/image/paper/2.png)
+
+![](https://github.com/salmoshu/location/raw/master/image/paper/3.png)
+
+![](https://github.com/salmoshu/location/raw/master/image/paper/4.png)
+
+![](https://github.com/salmoshu/location/raw/master/image/paper/5.png)
+
+![](https://github.com/salmoshu/location/raw/master/image/paper/6.png)
+
+![](https://github.com/salmoshu/location/raw/master/image/paper/7.png)
+
+![](https://github.com/salmoshu/location/raw/master/image/paper/8.png)
+
+![](https://github.com/salmoshu/location/raw/master/image/paper/9.png)
