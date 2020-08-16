@@ -99,11 +99,44 @@ class Model(object):
         accuracy = self.square_accuracy(predict, online_location)
         return predict, accuracy
 
+    # 选取信号最强的num个rssi作为匹配
+    def wknn_strong_signal_reg(self, offline_rss, offline_location, online_rss, online_location):
+        num = 8
+        k = 3
+        rssi_length = offline_rss.shape[1]
+        knn_reg = neighbors.KNeighborsRegressor(n_neighbors=k, weights='distance', metric='euclidean')
+
+        limited_location = None
+
+        for rssi in online_rss:
+            keys = np.argsort(rssi)[(rssi_length - num):]
+            # keys = np.argsort(rssi)[:num]
+            rssi = rssi.reshape(1, rssi_length)
+            limited_online_rssi = rssi[:,keys] # from small to big
+            limited_offline_rssi = offline_rss[:,keys]
+            predict_point = knn_reg.fit(limited_offline_rssi, offline_location).predict(limited_online_rssi)
+            if limited_location is None:
+                limited_location = predict_point
+            else:
+                limited_location = np.concatenate((limited_location, predict_point), axis=0)
+
+        predict = limited_location
+        accuracy = self.square_accuracy(predict, online_location)
+        return predict, accuracy
+
     # knn regression
     def knn_reg(self, offline_rss, offline_location, online_rss, online_location):
         k = 3
         knn_reg = neighbors.KNeighborsRegressor(n_neighbors=k, weights='uniform', metric='euclidean')
         predict = knn_reg.fit(offline_rss, offline_location).predict(online_rss)
+        accuracy = self.square_accuracy(predict, online_location)
+        return predict, accuracy
+    
+    # wknn regression
+    def wknn_reg(self, offline_rss, offline_location, online_rss, online_location):
+        k = 2
+        wknn_reg = neighbors.KNeighborsRegressor(n_neighbors=k, weights='distance', metric='euclidean')
+        predict = wknn_reg.fit(offline_rss, offline_location).predict(online_rss)
         accuracy = self.square_accuracy(predict, online_location)
         return predict, accuracy
     
