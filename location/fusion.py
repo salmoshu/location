@@ -29,6 +29,7 @@ class Model(object):
        ,observation_matrices
        ,transition_covariance
        ,observation_covariance
+    #    ,testing
         ):
 
         conv_length = len(transition_states)-1
@@ -63,6 +64,18 @@ class Model(object):
         H = observation_matrices # 观测矩阵
         R = observation_covariance # 观测噪声方差
 
+        # LType-03 data
+        # sigma_wifi = np.array([12.62, 12.39, 13.7, 24.38, 26.74, 25.63, 23.93, 33.14, 18.53, 28.68, 34.44, 30.8, 32.67, 32.22, 41.48, 31.78, 27.58, 26.5, 34.85, 25.11, 31.97, 25.74, 23.13, 25.55, 29.25, 31.05, 33.26, 33.16, 31.39, 33.95])
+        # sigma_wifi = sigma_wifi/10
+        # sigma_observation = [R]
+        # for v in sigma_wifi:
+        #     sigma_observation.append(
+        #         np.matrix([[v**2, 0, 0, 0],
+        #                     [0, v**2, 0, 0],
+        #                     [0, 0, 0, 0],
+        #                     [0, 0, 0, 0.1**2]])
+        #     )
+
         for i in range(conv_length):
             # 状态预测
             state_values = [X[k, 0] for k in range(state_parameters_num)]
@@ -70,6 +83,8 @@ class Model(object):
             X_ = np.matrix([[new_state_values[k]] for k in range(state_parameters_num)])
 
             # 一阶线性化后的状态矩阵
+            # if testing is 1:
+            #     R = sigma_observation[i]
             F = jacobF_func(i)
             P_ = F * P * F.T + Q
             K = P_ * H.T * np.linalg.pinv(H * P_ * H.T + R)
