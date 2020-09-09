@@ -611,21 +611,3 @@ PS C:\Users\salmo\Desktop>
 # 科研创新
 
 本部分将在大论文完成以后更新。
-
-![](https://github.com/salmoshu/location/raw/master/image/paper/1.png)
-
-![](https://github.com/salmoshu/location/raw/master/image/paper/2.png)
-
-![](https://github.com/salmoshu/location/raw/master/image/paper/3.png)
-
-![](https://github.com/salmoshu/location/raw/master/image/paper/4.png)
-
-![](https://github.com/salmoshu/location/raw/master/image/paper/5.png)
-
-![](https://github.com/salmoshu/location/raw/master/image/paper/6.png)
-
-![](https://github.com/salmoshu/location/raw/master/image/paper/7.png)
-
-![](https://github.com/salmoshu/location/raw/master/image/paper/8.png)
-
-![](https://github.com/salmoshu/location/raw/master/image/paper/9.png)
