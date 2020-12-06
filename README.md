@@ -611,6 +611,6 @@ PS C:\Users\salmo\Desktop>
 
 # 历史版本
 
-1. [初始提交版本V1.0]: https://github.com/salmoshu/location/tree/207761d6d4e62300dd5a74074e8ace3996b455e9
+1. [初始提交版本V1.0](https://github.com/salmoshu/location/tree/207761d6d4e62300dd5a74074e8ace3996b455e9)
 
    实现了融合定位的基础功能，留作自己备份，建议读者使用最新版本。
