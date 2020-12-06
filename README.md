@@ -1,6 +1,8 @@
 # Location
 
-**Location**是一个多源数据融合定位的项目，目前包含了Wi-Fi指纹定位、行人航位推算（PDR）与基于EKF的Wi-Fi指纹与PDR的融合定位，本项目针对的平台为安卓平台，融合使用的数据为Wi-Fi数据、加速度计数据、陀螺仪数据、重力传感器数据、姿态仰角数据。
+**Location**是一个多源数据融合定位的科研项目，目前包含了Wi-Fi指纹定位、行人航位推算（PDR）与基于EKF的Wi-Fi指纹与PDR的融合定位，本项目针对的平台为安卓平台，融合使用的数据为Wi-Fi数据、加速度计数据、陀螺仪数据、重力传感器数据、姿态仰角数据。
+
+需要注意的是，安卓平台主要用于采集实验数据，数据分析与定位轨迹生成主要使用Python离线完成。
 
 # 目录
 
@@ -13,7 +15,7 @@
     * [Demo2 Wi-Fi指纹定位](#Demo2-Wi-Fi指纹定位)
     * [Demo3 融合定位](#Demo3-融合定位)
 * [数据采集程序](#数据采集程序)
-* [科研创新](#科研创新)
+* [历史版本](#历史版本)
 
 # 第三方依赖
 
@@ -27,20 +29,19 @@
 | **data** | **实验数据** |
 |:--|---|
 | data/count_steps | 正常直线行走数据，包含了安卓或苹果设备采集的数据，用来判断步伐检测的结果是否良好，其中安卓程序为自己开发的程序，苹果数据采集程序为phyphox（使用的时候注意修改属性名，方便后续程序使用）。 |
-| data/pdr       | 非正常行走数据（每一步停留了3s以上），Rectangle（矩阵路线行走数据）和SType（S型路线行走数据）。 |
-| data/fusion          | 融合定位实验，具体数据包含了：Fingerprint（指纹数据）、LeftBorder（左边缘测试点）、RightBorder（右边缘测试点）和LType（L型路线行走数据）。 |
+| data/fusion          | 小范围融合定位实验，具体数据包含了：Fingerprint（指纹数据）、LeftBorder（左边缘测试点）、RightBorder（右边缘测试点）和LType（L型路线行走数据）。 |
 | data/linear_08m        | 正常直线行走数据，行走步数为10步，每一步为固定步长0.8m。     |
 | data/rssi_fluctuation  | 一组长时间记录Wi-Fi变化的数据，每个文件大约记录2万条样本数据，该数据可以用来分析Wi-Fi数据的波动情况。 |
 | data/still             | 静止数据，用来分析惯性传感器数据的特性。                     |
 
 # 开始使用
 
-Location模块的wifi和fusion功能使用前提（pdr由于不使用wifi数据因此不受影响）：操作的文件格式大概为如下所示，其中rssi根据实验过程中AP数量决定。
+Location的使用前提：操作的文件格式大概为如下所示，其中rssi根据实验过程中AP数量决定，AP为指定的固定路由器，比较适合小范围实验。
 
-| timestamp     | rssi1 (dbm) | rssi2 (dbm) | rssi3 (dbm) | rssi4 (dbm) | linear-x(m/s) | linear-y(m/s) | linear-z(m/s) | gravity-x(m/s) | gravity-y(m/s) | gravity-z(m/s) | rotation-x | rotation-y | rotation-z | rotation-w |
-| ------------- | ----------- | ----------- | ----------- | ----------- | ------------- | ------------- | ------------- | -------------- | -------------- | -------------- | ---------- | ---------- | ---------- | ---------- |
-| 1591610015190 | -37         | -45         | -66         | -64         | 0.1322        | -0.0105       | 0.5227        | 0.4463         | 2.8838         | 9.3623         | 0.078042   | -0.12869   | -0.75696   | 0.635895   |
-| ...           | ...         | ...         | ...         | ...         | ...           | ...           | ...           | ...            | ...            | ...            | ...        | ...        | ...        | ...        |
+| timestamp     | rssi1 | rssi2 | rssi3 | rssi4 | linear-x | linear-y | linear-z | gravity-x | gravity-y | gravity-z | rotation-x | rotation-y | rotation-z | rotation-w |
+| ------------- | ----- | ----- | ----- | ----- | -------- | -------- | -------- | --------- | --------- | --------- | ---------- | ---------- | ---------- | ---------- |
+| 1591610015190 | -37   | -45   | -66   | -64   | 0.1322   | -0.0105  | 0.5227   | 0.4463    | 2.8838    | 9.3623    | 0.078042   | -0.12869   | -0.75696   | 0.635895   |
+| ...           | ...   | ...   | ...   | ...   | ...      | ...      | ...      | ...       | ...       | ...       | ...        | ...        | ...        | ...        |
 
 可以利用pandas读取数据，并获取为numpy.ndarray格式数据，location模块中类的参数均为numpy.ndarray格式。
 
@@ -79,7 +80,7 @@ pdr = pdr.Model(linear, gravity, rotation)
 | walkType | 描述                                                         |
 | :------- | :----------------------------------------------------------- |
 | normal   | 正常行走模式。                                               |
-| fusion   | 实验行走模式。在做Wi-Fi指纹与PDR融合定位的时候，由于安卓设备Wi-Fi扫描有一定的时间间隔，所以在实验的过程中，两步之间的控制时间大于3s，所以算法部分进行了不同处理。 |
+| abnormal | 小范围实验行走模式。在做Wi-Fi指纹与PDR融合定位的时候，由于安卓设备Wi-Fi扫描有一定的时间间隔（大约为2~3秒），所以在实验的过程中，两步之间的控制时间大于3s，算法部分进行了不同处理。 |
 
 示例1，对data/linear_08m中的数据进行分析。
 
@@ -94,7 +95,7 @@ pdr.show_steps(frequency=70, walkType='normal')
 示例2，对fusion01/SType中的数据进行分析。
 
 ```pytyon
-pdr.show_steps(frequency=70, walkType='fusion')
+pdr.show_steps(frequency=70, walkType='abnormal')
 ```
 
 结果如下：
@@ -192,7 +193,7 @@ stride_length = pdr.step_stride(acc)
 | walkType | 描述                                                         |
 | :------- | :----------------------------------------------------------- |
 | normal   | 正常行走模式。                                               |
-| fusion   | 实验行走模式。在做Wi-Fi指纹与PDR融合定位的时候，由于安卓设备Wi-Fi扫描有一定的时间间隔，所以在实验的过程中，两步之间的控制时间大于3s，所以算法部分进行了不同处理。 |
+| abnormal | 实验行走模式。在做Wi-Fi指纹与PDR融合定位的时候，由于安卓设备Wi-Fi扫描有一定的时间间隔，所以在实验的过程中，两步之间的控制时间大于3s，所以算法部分进行了不同处理。 |
 
 示例1，对data/linear_08m中的数据进行分析。
 
@@ -285,7 +286,7 @@ yaw = pdr.step_heading()
 示例：
 
 ```python
-position_x, position_y, strides, angle = pdr.show_steps(frequency=70, walkType='fusion'， offset=np.pi/2, initPosition=(0,0))
+position_x, position_y, strides, angle = pdr.show_steps(frequency=70, walkType='abnormal'， offset=np.pi/2, initPosition=(0,0))
 ```
 
 ### Demo1.8 show_trace函数：输出行走轨迹图
@@ -294,29 +295,29 @@ position_x, position_y, strides, angle = pdr.show_steps(frequency=70, walkType='
 
 - **frequency** - 数据采集频率
 - **walkType** - 行走模式
-- **offset** - 初始航向角大小
+- **offset** - 轨迹偏差角度（指上北下南地图中的轨迹旋转到输出轨迹的角度值，实验过程使用了安卓的旋转矢量软件传感器，它集成了加速度计、陀螺仪和磁力计的数据，最终输出了一个以地球坐标系为基础的绝对信息，但实验输出图有时候会分析一个相对定位的情景，所以可以用该偏差值进行修正）
 - **initPosition** - 初始位置，格式为两个元素的元组形式，分别表示x与y
-- **realTrace** - 两列的numpy.ndarray格式数据，表示真实轨迹坐标（可选）
+- **realTrace** - 两列的numpy.ndarray格式数据，表示真实轨迹坐标，主要是为了方便轨迹的对比（可选）
 
 | walkType | 描述                                                         |
 | :------- | :----------------------------------------------------------- |
 | normal   | 正常行走模式。                                               |
-| fusion   | 实验行走模式。在做Wi-Fi指纹与PDR融合定位的时候，由于安卓设备Wi-Fi扫描有一定的时间间隔，所以在实验的过程中，两步之间的控制时间大于3s，所以算法部分进行了不同处理。 |
+| abnormal | 小范围实验行走模式。在做Wi-Fi指纹与PDR融合定位的时候，由于安卓设备Wi-Fi扫描有一定的时间间隔，所以在实验的过程中，两步之间的控制时间大于3s，所以算法部分进行了不同处理。 |
 
-示例1，显示data/SType数据的预测轨迹图：
+示例1，显示data/fusion/LType数据的预测轨迹图：
 
 ```python
-pdr.show_trace(frequency=70, walkType='fusion', initPosition=(0,0))
+pdr.show_trace(frequency=70, walkType='abnormal', initPosition=(2,1))
 ```
 
 结果如下：
 
 ![](https://github.com/salmoshu/location/raw/master/image/Demo1_8.png)
 
-示例2，显示data/SType数据的预测轨迹图：
+示例2，显示data/fusion/LType数据的预测轨迹图：
 
 ```python
-pdr.show_trace(frequency=70, walkType='fusion', offset=np.pi/2, real_trace=real_trace)
+pdr.show_trace(frequency=70, walkType='abnormal', offset=0, real_trace=real_trace, initPosition=(2,1))
 ```
 
 结果如下：
@@ -601,13 +602,15 @@ PS C:\Users\salmo\Desktop>
 
 一个使用该程序采集的数据文件大概长这个样子：
 
-| timestamp     | rssi1 (dbm) | rssi2 (dbm) | rssi3 (dbm) | rssi4 (dbm) | linear-x(m/s) | linear-y(m/s) | linear-z(m/s) | gravity-x(m/s) | gravity-y(m/s) | gravity-z(m/s) | rotation-x | rotation-y | rotation-z | rotation-w |
-| ------------- | ----------- | ----------- | ----------- | ----------- | ------------- | ------------- | ------------- | -------------- | -------------- | -------------- | ---------- | ---------- | ---------- | ---------- |
-| 1591610015190 | -37         | -45         | -66         | -64         | 0.1322        | -0.0105       | 0.5227        | 0.4463         | 2.8838         | 9.3623         | 0.078042   | -0.12869   | -0.75696   | 0.635895   |
-| ...           | ...         | ...         | ...         | ...         | ...           | ...           | ...           | ...            | ...            | ...            | ...        | ...        | ...        | ...        |
+| timestamp     | rssi1 | rssi2 | rssi3 | rssi4 | linear-x | linear-y | linear-z | gravity-x | gravity-y | gravity-z | rotation-x | rotation-y | rotation-z | rotation-w |
+| ------------- | ----- | ----- | ----- | ----- | -------- | -------- | -------- | --------- | --------- | --------- | ---------- | ---------- | ---------- | ---------- |
+| 1591610015190 | -37   | -45   | -66   | -64   | 0.1322   | -0.0105  | 0.5227   | 0.4463    | 2.8838    | 9.3623    | 0.078042   | -0.12869   | -0.75696   | 0.635895   |
+| ...           | ...   | ...   | ...   | ...   | ...      | ...      | ...      | ...       | ...       | ...       | ...        | ...        | ...        | ...        |
 
 
 
-# 科研创新
+# 历史版本
 
-本部分将在大论文完成以后更新。
+1. [初始提交版本V1.0]: https://github.com/salmoshu/location/tree/207761d6d4e62300dd5a74074e8ace3996b455e9
+
+   实现了融合定位的基础功能，留作自己备份，建议读者使用最新版本。

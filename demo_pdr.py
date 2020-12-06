@@ -7,7 +7,7 @@ import os
 path = os.path.abspath(os.path.join(os.getcwd(), "./data"))
 # walking_data_file = path + '/linear_8m/linear01.csv'
 # walking_data_file = path + '/still/still02.csv'
-walking_data_file = path + '/fusion/LType/LType-01.csv'
+walking_data_file = path + '/fusion/LType/LType-06.csv'
 real_trace_file = path + '/fusion/LType/RealTrace.csv'
 real_trace = pd.read_csv(real_trace_file).values # 真实轨迹
 
@@ -22,8 +22,8 @@ pdr = pdr.Model(linear, gravity, rotation)
 
 # # Demo1：显示垂直方向合加速度与步伐波峰分布
 # # frequency：数据采集频率
-# # walkType：行走方式（normal为正常走路模式，fusion为做融合定位实验时走路模式）
-# pdr.show_steps(frequency=70, walkType='normal')
+# # walkType：行走方式（normal为正常走路模式，abnormal为做融合定位实验时走路模式）
+# pdr.show_steps(frequency=70, walkType='abnormal')
 
 # # Demo2：显示数据在一定范围内的分布情况，用来判断静止数据呈现高斯分布
 # # 传入参数为静止状态x（y或z）轴线性加速度
@@ -66,4 +66,4 @@ pdr = pdr.Model(linear, gravity, rotation)
 # Demo6：显示PDR预测轨迹
 # 注意：PDR不清楚初始位置与初始航向角
 # pdr.show_trace(frequency=70, walkType='normal')
-pdr.show_trace(frequency=70, walkType='fusion', offset=0, initPosition=(2,1), real_trace=real_trace)
+pdr.show_trace(frequency=70, walkType='abnormal', offset=0, real_trace=real_trace, initPosition=(2,1))

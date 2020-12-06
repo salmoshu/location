@@ -27,7 +27,7 @@ wifi = wifi.Model(rssi)
 fingerprint_rssi, fingerprint_position = wifi.create_fingerprint(fingerprint_path)
 
 # 找到峰值出的rssi值
-steps = pdr.step_counter(frequency=70, walkType='fusion')
+steps = pdr.step_counter(frequency=70, walkType='abnormal')
 print('steps:', len(steps))
 result = fingerprint_rssi[0].reshape(1, rssi.shape[1])
 for k, v in enumerate(steps):

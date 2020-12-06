@@ -66,7 +66,7 @@ class Model(object):
 
         walkType取值：
         normal：正常行走模式
-        fusion：融合定位行走模式（每一步行走间隔大于1s）
+        abnormal：融合定位行走模式（每一步行走间隔大于1s）
 
         返回值：
         steps
@@ -82,7 +82,8 @@ class Model(object):
         min_acceleration = 0.2 * g # 0.2g
         max_acceleration = 2 * g   # 2g
         # 峰值间隔(s)
-        min_interval = 0.4 if walkType=='normal' else 3 # 'fusion
+        # min_interval = 0.4
+        min_interval = 0.4 if walkType=='normal' else 3 # 'abnormal
         # max_interval = 1
         # 计算步数
         steps = []
@@ -133,9 +134,10 @@ class Model(object):
     # 根据姿势直接使用yaw
     def step_heading(self):
         _, _, yaw = self.quaternion2euler()
-        init_theta = yaw[0] # 初始角度
+        # init_theta = yaw[0] # 初始角度
         for i,v in enumerate(yaw):
-            yaw[i] = -(v-init_theta) # 由于yaw逆时针为正向，转化为顺时针为正向更符合大家的思维方式
+            # yaw[i] = -(v-init_theta)
+            yaw[i] = -v # 由于yaw逆时针为正向，转化为顺时针为正向更符合常规的思维方式
         return yaw
     
     '''
@@ -170,7 +172,7 @@ class Model(object):
     显示步伐检测图像
       walkType取值：
         - normal：正常行走模式
-        - fusion：融合定位行走模式（每一步行走间隔大于1s）
+        - abnormal：融合定位行走模式（每一步行走间隔大于1s）
     '''
     def show_steps(self, frequency=100, walkType='normal'):
         a_vertical = self.coordinate_conversion()
